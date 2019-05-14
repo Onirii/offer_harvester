@@ -345,6 +345,7 @@ mutalbe的中文意思是“可变的，易变的”，跟constant（既C++中�
 
 ## 10.2 编译
 将预处理完的文件进行一系列词法分析、语法分析、语义检查和中间代码生成、代码优化和目标代码生成，产生相应的汇编代码文件。
+
 ## 10.3 汇编
 **将编译完成的代码文件翻译成机器指令，并生成可重定位目标程序的.o文件，该文件为二进制文件，字节编码是机器指令。**<br>
 汇编器是将汇编代码转变成机器可以执行的指令，每一个汇编语句几乎都对应一条机器指令。所以汇编器的汇编过程相对于编译器来讲比较简单，它没有复杂的语法，也没有语义，也不需要做指令优化，只是根据汇编指令和机器指令的对照表一一翻译即可。
@@ -484,4 +485,90 @@ C++定义了一组内置类型对象之间的标准转换，在必要时它们�
 ### 14.1.2 整值提升
 
 
-# 15. 
+# 15. C++常用库函数
+
+## 15.1 数学函数
+0. 头文件 #include <math> 或者 #include <math.h>
+1. int abs(int x)	        求整数x的绝对值	绝对值
+2. double acos(double x)	计算arcos(x)的值	计算结果
+3. double asin(double x)	计算arsin(x)的值	计算结果
+4. double atan(double x)	计算arctan(x)的值	计算结果
+5. double cos(double x)	    计算cos(x)的值	计算结果
+6. double cosh(double x)	计算x的双曲余弦cosh(x)的值	计算结果
+7. double exp(double x)	    求的值	计算结果
+8. double fabs(double x)	求实数x的绝对值	绝对值
+9. double fmod(double x)	求x/y的余数	余数的双精度数
+10. long labs(long x)	    求长整型数的绝对值	绝对值
+11. double log(double x)	计算In(x)的值	计算结果
+12. double log10(double x)	计算的值	计算结果
+13. double modf(double x, double \*y)	取x的整数部分送到y所指向的单元格中	x的小数部分
+14. double pow(double x, double y)	    求x的y次幂的值	计算结果
+15. double sin(double x)	            计算sin(x)的值	计算结果
+16. double sqrt(double x)	            求的值	计算结果
+17. double tan(double x)	            计算tan(x)的值	计算结果
+18. fcvt	将浮点型数转化为字符串	  
+
+## 15.2 字符串处理函数
+0. 头文件 #include <string> 或者 #include <string.h>
+1. void \*memcpy(void \*p1, const void \*p2 size_t n) 
+存储器拷贝，将p2所指向的共n个字节拷贝到p1所指向的存储区中，目的存储区的起始地址（实现任意数据类型之间的拷贝）
+2. void \*memset(void \*p int v, size_t n)
+将v的值作为p所指向的区域的值，n是p所指向区域的大小，该区域的起始地址
+3. char \*strcpy(char \*p1, const char \*p2) 
+将p2所指向的字符串拷贝到p1所指向的存储区中，目的存储区的起始地址
+4. char \*strcat(char \*p1, const char \*p2)	
+将p2所指向的字符串连接到p1所指向的字符串后面，目的存储区的起始地址
+5. int strcmp(const char \*p1, const char \*p2)	
+比较p1,p2所指向的两个字符串的大小，两个字符串相同，返回0；若p1所指向的字符串小于p2所指的字符串，返回负值；否则，返回正值
+6. int strlen(const char \*p)	
+求p所指向的字符串的长度，字符串所包含的字符个数（不包括字符串结束标志’\n’）
+7. char \*strncpy(char \*p1, const char \*p2, size_t n)	
+将p2所指向的字符串（至多n个字符）拷贝到p1所指向的存储区中，目的存储区的起始地址(与strcpy()类似)
+8. char \*strncat(char \*p1, const char \*p2, size_t n)
+将p2所指向的字符串（至多n个字符）连接到p1所指向的字符串的后面	，目的存储区的起始地址(与strcat()类似)
+9. char \*strncmp(const char \*p1, const char \*p2, size_t n)	
+比较p1,p2所指向的两个字符串的大小，至多比较n个字符；两个字符串相同，返回0；若p1所指向的字符串小于p2所指的字符串，返回负值；否则，返回正值(与strcmp()类似)
+10. char \*strstr(const char \*p1, const char \*p2)
+判断p2所指向的字符串是否是p1所指向的字符串的子串，若是子串，返回开始位置的地址；否则返回0。
+
+## 15.3 实现键盘和文件输入/输出的成员函数
+0. 头文件#include <iostream> 或者 #include <iostream.h>
+1. cin >> v	                                                                输入值送给变量	 
+2. cout << exp	                                                            输出表达式exp的值	 
+3. istream & istream::get(char &c)	                                        输入字符送给变量c	 
+4. istream & istream::get(char \*, int , char = ‘\n’)	                    输入一行字符串	 
+5. istream & istream::getline(char \*, int , char = ‘\n’)	                输入一行字符串	 
+6. void ifstream::open(const char\*,int=ios::in, int = filebuf::openprot)	打开输入文件	 
+7. void ofstream::open(const char\*,int=ios::out, int = filebuf::openprot)	打开输出文件	 
+8. void fsream::open(const char\*, int, int = filebuf::openprot)	        打开输入/输出文件	 
+9. ifstream::ifstream(const char\*,int = ios::in, int = filebuf::openprot)	构造函数打开输入文件	 
+10. ofstream::ofstream(const char\*,int=ios::out, int = filebuf::openprot)	构造函数打开输出函数	 
+11. fstream::fstream(const char\*, int, int = filebuf::openprot)	        构造函数打开输入/输出文件	 
+12. void istream::close()	                                                关闭输入文件	 
+13. void ofsream::close()	                                                关闭输出文件	 
+14. void fsream::close()	                                                关闭输入/输出文件	 
+15. istream & istream::read(char\*, int)	                                从文件中读取数据	 
+16. ostream & istream::write(const char\*,int)	                            将数据写入文件中	 
+17. int ios::eof()	                                                        判断是否到达打开文件的尾部	  1为到达2为没有
+18. istream & istream::seekg(streampos)	                                    移动输入文件的指针	 
+19. istream & istream::seekg(streamoff,ios::seek_dir)	                    移动输入文件的指针	 
+20. streampos istream::tellg()	                                            取输入文件的指针	 
+21. ostream & ostream::seekp(streampos)	                                    移动输出文件的指针	 
+22. ostream & ostream::seekp(streamoff,ios::seek_dir)	                    移动输出文件的指针	 
+23. streampos ostream::tellp()	                                            取输出文件的指针
+
+## 15.4 其他常用函数
+0. 头文件#include <stdlib> 或者 #include <stdlib.h>
+1. void abort(void)	终止程序执行	 	不能结束工作
+2. void exit(int)	终止程序执行	 	做结束工作
+3. double atof(const char \*s)	将s所指向的字符串转换成实数	实数值	 
+4. int atoi(const char \*s)	    将s所指向的字符串转换成整数	整数值	 
+5. long atol(const char \*s)	将s所指的字符串转换成长整数	长整数值	 
+6. int rand(void)	            产生一个随机整数	随机整数	 
+7. void srand(unsigned int)	    初始化随机数产生器	 	 
+8. int system(const char \*s)	将s所指向的字符串作为一个可执行文件，并加以执行	 	 
+9. max(a, b)	求两个数中的大数	大数	参数为任意类型
+10. min(a,b)	求两个数中的小数	小数	参数为任意类型	 
+
+
+# 16. 
