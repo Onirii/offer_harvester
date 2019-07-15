@@ -23,6 +23,7 @@ void swap(int &a, int &b) {//交换函数
     a = b;
     b = tmp;
 }
+
 void bubbleSort(int a[],int len) {
     for (int i = 0; i < len; ++i) {//排列len趟完成排序
         for (int j = 0; j < len - i - 1; ++j) {//每趟排序的元素都从第一个元素开始到尾部没有排序好的元素。第一趟为第一个元素到最后一个元素，排出了最大元素。第二趟为第一个元素到倒数第二个元素(排除以排序好的元素)，排出第二大的元素。
@@ -32,6 +33,7 @@ void bubbleSort(int a[],int len) {
         }
     }
 }
+
 int main() {
     int a[] = { 520,0,1,9,56,100,1,85,5,3,6 };
     int len = sizeof(a) / sizeof(a[0]);
@@ -39,7 +41,6 @@ int main() {
     for (int i = 0; i < len; ++i) {
         cout << " " << a[i];
     }
-    getchar();
     return 0;
 }
 ```
@@ -83,7 +84,7 @@ void bubbleSort(int a[],int len) {
 }
 
 int main() {
-    int a[] = { 520,0,1,9,56,100,1,85,5,3,6 };
+    int a[] = {520,0,1,9,56,100,1,85,5,3,6};
     int len = sizeof(a) / sizeof(a[0]);
     bubbleSort(a, len);
     for (int i = 0; i < len; ++i) {
@@ -136,7 +137,6 @@ int main() {
     for (int i = 0; i < len; ++i) {
         cout << " " << a[i];
     }
-    getchar();
     return 0;
 }
 ```
@@ -184,6 +184,7 @@ int main() {
     return 0;
 }
 ```
+
 ### 1.3.5 插入排序的改进
 新元素在插入到有序区时，使用二分法查找位置而非一个一个依次查找。
 ```cpp
@@ -221,15 +222,23 @@ int main(){
 
 ## 1.4 希尔排序
 ### 1.4.1 希尔排序的基本思想
+希尔排序是以某个增量h为步长跳跃分组进行插入排序，由于增量是一个从h逐渐缩小至1的过程，所以又称缩小增量排序。 
+其核心在于间隔序列设定，即增量的设定，这也是也插入排序的本质区别。插入排序始终增量为1。 
+**最佳增量:k趟排序增量步长为(2^k)-1,即增量序列(2^k)-1,…15,7,3,1。**
 
 ### 1.4.2 希尔排序的具体步骤
+1. 确定增量序列(t1,t2…tk)ti>tj,tk=1; 
+2. 按增量序列个数k分成k趟排序 
+3. 每趟排序按对应增量ti，将序列分割成若干子序列，分别进行直接插入排序。
 
 ### 1.4.3 希尔排序的时间复杂度
 
 ### 1.4.4 希尔排序的cpp实现
 ```cpp
 #include<iostream>
+
 using namespace std;
+
 void swap(int &a, int &b){
     int tmp = a;
     a = b;
@@ -239,20 +248,14 @@ void swap(int &a, int &b){
 void shellSort(int a[], int len) {
     int gap = len ;
     while (gap = gap / 2) {//增量
-        cout << "每列待排序元素："<<endl;
         for (int i = gap; i < len; i++) {
-            cout << i << " ";
             int key = a[i];//待排序元素
             int j = i - gap;
             for (; j+1>0&&a[j ] > key; j -= gap) {//插入排序
                 a[j + gap] = a[j];
             }
             a[j + gap] = key;
-        }cout << endl;
-         cout << "增量" << gap << "的排序结果：" << endl;
-        for (int i = 0; i < len; ++i) {
-            cout << " " << a[i];
-        }cout <<endl;
+        }
     }
 }
 
@@ -326,7 +329,6 @@ int main() {
     for (int i = 0; i < len; ++i) {
         cout << " " << a[i];
     }
-    getchar();
     return 0;
 }
 ```
@@ -375,7 +377,7 @@ void quickSort(int s[], int l, int r)
     }
 }
 int main() {
-    int a[] = { 0,4,1,2,3,0,0,0 };
+    int a[] = {0,4,1,2,3,0,0,0};
     int len = sizeof(a) / sizeof(a[0]);
     quickSort(a, 0, len - 1);
     for (int i = 0; i < len; ++i) {
@@ -386,19 +388,19 @@ int main() {
 ```
 
 ## 1.7 堆排序
-### 1.2.1 堆排序的基本思想
+### 1.7.1 堆排序的基本思想
 堆排序是将数组构建成大顶堆，即根节点是数组中最大元素，将根节点与堆底最后一个元素交换，使得最大值排到末尾，即已排序好。将剩下的n-1个元素重新调整为大顶堆，在堆顶/根节点处得到第二大的值，与堆底最后一个元素交换，便又排序好一个元素。
 
-### 1.2.2 堆排序的具体步骤
+### 1.7.2 堆排序的具体步骤
 1. 将数组构建成大顶堆 
 2. 交换堆顶元素和堆底元素 
 3. 调整堆，使其重新成为大顶堆 
 4. 重复步骤2和步骤3 n-1次，排序完成。n为数组长度。
 
-### 1.2.3 堆排序的时间复杂度
+### 1.7.3 堆排序的时间复杂度
 最好、最坏，平均都为o(nlogn)
 
-### 1.2.4 堆排序的cpp实现
+### 1.7.4 堆排序的cpp实现
 ```cpp
 #include<iostream>
 
@@ -416,11 +418,11 @@ void heap(int a[],int node,int len){
         if(i + 1 < len&&a[i + 1] > a[i])//如果右子树节点存在且右子树节点大于左子树，那么将下标移到右子树位置
             i++;
         if (a[i] > a[node]) {
-            a[node] = a[i];
+            a[node] = a[i]; //大节点上浮
             node = i;
         }
     }
-    a[node] = nodecopy;//确定a[node]最终位置
+    a[node] = nodecopy; //确定a[node]最终位置
 }
 
 void heapSort(int a[],int len) {
@@ -434,13 +436,13 @@ void heapSort(int a[],int len) {
 }
 
 int main() {
-    int a[] = { 7,0,1,2,8,5,9, };
+    int a[] = {7,0,1,2,8,5,9};
     int len = sizeof(a) / sizeof(a[0]);
     heapSort(a, len);
     for (int i = 0; i < len; ++i) {
         cout << " " << a[i];
     }
-    getchar();
+    return 0;
 }
 ```
 
@@ -544,7 +546,6 @@ void radixSort(int a[], int len) {
                 if(!radix[i].empty())
                         radix[i].clear();
             }
-
     }
 }
 
