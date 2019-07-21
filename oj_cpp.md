@@ -32,3 +32,5 @@
 		cout<<fixed<<setprecision(n)<<result<<endl;
 		//就算后面的cout语句没有声明<<fixed，仍然会做<<fixed处理。
 		```
+
+		
