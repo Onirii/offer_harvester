@@ -238,7 +238,115 @@ mutalbe的中文意思是“可变的，易变的”，跟constant（既C++中�
 即在变量的作用范围之外使用了指向变量地址的指针。这一般发生在将调用函数中的局部变量的地址传出来。这点容易被忽略，虽然代码是很可能可以执行无误，然而却是极其危险的。局部变量的作用范围虽然已经结束，内存已经被释放，然而地址值仍是可用的，不过随时都可能被内存管理分配给其他变量。
 
 # 5. C++中的智能指针
-## 5.1 
+C++中的各种类型的对象，全局对象在程序启动时分配，在程序结束时销毁。局部自动对象在进入其定义所在的程序时被创建，在离开块时销毁。局部static对象在第一次使用前分配，在程序结束时销毁。动态分配的对象的生存期与它们在哪里被创建是无关的，只有当其被显式地释放时，这些对象才会被销毁。动态对象的正确释放是编程中极其容易出错的地方，为了更安全地使用动态对象，标准库定义了两个智能指针shared_ptr 和 unique_ptr 来管理动态分配的对象。当一个对象应该被释放时，指向它的智能指针可以确保自动地释放它。
+## 5.1 auto_ptr类
+### 5.1.1 
+auto_ptr要求对它所拥有的指针完全占用，所以两个auto_ptr指针不能同时拥有一个一般指针，当前占有一般指针的auto_ptr会剥夺之前智能指针的所有权，如果此时再操作之前的智能指针就会发生错误。auto_ptr智能指针不能作为函数参数按值传递，而应该作为引用传递但又不能预测函数体内是否发生所有权的转移。auto_ptr在进行赋值和复制时会进行一些特殊操作，所以它不能作为C++STL中容器的元素。由于auto_ptr这些缺陷导致它已经被新的C++11标准抛弃啦。取而代之的是新标准中的shared_ptr、unique_ptr、weak_ptr这三种智能指针。 
+
+## 5.2 shared_ptr类
+### 5.2.1 shared_ptr的功能
+
+### 5.2.2 shared_ptr的基本操作
+```cpp
+shared_ptr<Type> sp //空智能指针，可以指向类型为T的对象。
+sp //将sp用作一个条件判断，若sp指向一个对象，则为true。
+*sp //解引用sp，获得它指向的对象
+sp->mem
+sp.get() // 返回sp中保存的智能指针。如果智能指针释放了其对象，返回的指针所指向的对象也就消失了。
+swap(sp, q) // 交换sp和q中的指针
+sp.swap(q)
+
+
+make_shared<T> (args) //返回一个shared_ptr，指向一个动态分配的类型为T的对象。使用args初始化此对象。
+shared_ptr<T>sp(q) // p是shared_ptr q的拷贝；此操作会递增q中的计数器。q中的指针必须能转换成T*。
+sp = q //p和q都是shared_ptr，所保存的指针必须能相互转换。此操作会递减sp的引用计数，递增q的引用计数；如果sp的引用计数变为0，则将其管理的原内存释放。
+sp.unique() //如果p.use_count()为1，返回true,否则返回false。
+sp.use_count() //返回与p共享对象的智能指针数量
+```
+### shared_ptr注意事项
+1. 最安全的分配和使用动态内存的方法是调用make_shared函数，此函数在动态内存中分配一个对象并初始化它，返回指向此对象的shared_ptr。
+2. 与auto_ptr独占相比，shared_ptr允许多个指针拥有一个对象。 
+3. 默认创建的指针是一个空指针，解引用一个智能指针返回它指向的对象。 
+4. 每个shared_ptr都有一个关联的引用计数器。当我们拷贝一个shared_ptr时计数器的值会递增；当我们给它赋一个新值或者销毁它时计数器会递减。 
+5. 自动销毁所管理的对象。由于智能指针都是类，它有自己的析构函数，当它的引用计数器变为0时会自动调用析构函数销毁该对象。 
+6. 和new结合使用，默认的shared_ptr是一个空指针，可以使用new来给它初始化，但不可以直接初始化。例如：shared_ptr p1(new int(100))可以,shared_ptrp2 = new int(100)不可以。
+
+### 5.2.2 shared_ptr是否存在内存泄漏的情况？应该怎么解决？
+当两个对象相互使用一个shared_ptr成员变量指向对方，会造成循环引用，使引用计数失效，从而导致内存泄漏。
+为了解决循环引用导致的内存泄漏，引入了weak_ptr弱指针，weak_ptr的构造函数不会修改引用计数的值，从而不会对对象的内存进行管理，其类似一个普通指针，但不指向引用计数的共享内存，但是其可以检测到所管理的对象是否已经被释放，从而避免非法访问。
+
+## 5.3 unique_ptr类
+### 5.3.1 unique_ptr特点
+1. 与shared_ptr不同，unique_ptr是独占所拥有的对象。所以当unique_ptr被销毁时它指向的对象也会被销毁。 
+2. shared_ptr提供了一个make_shared的标准函数库来返回shared_ptr，而unique_ptr则没有类似的函数。当我们定义一个unique_ptr时需要使用new来为其直接初始化。 
+3. 由于(1)的原因，它不支持普通的拷贝和复制操作。 
+4. unique_ptr提供了release和reset方法将指针的所有权转移。例如： 
+unique_ptr p1(new string(“ISMILELI”)); 
+unique_ptr p2(p1.release()); // 将p1置空并将所有权给p2 
+unique_ptr p3(new string(“hello world”)); 
+p2.reset(p3.release()); // reset释放了p2原来的内存并把p3的所有权转移给了p2。 
+5. release切断了unique_ptr和它所管理的对象之间的联系。release的返回值一般用来初始化另一个智能指针或者给另一个智能指针赋值。如果给一个普通的指针赋值的话就需要我们自己手动释放该普通指针的内存才行。 
+
+### 5.3.2 unique_ptr的基本操作
+```cpp
+shared_ptr<Type> up //空智能指针，可以指向类型为T的对象。
+up //将up用作一个条件判断，若up指向一个对象，则为true。
+*up //解引用up，获得它指向的对象
+up->mem
+up.get() // 返回sp中保存的智能指针。如果智能指针释放了其对象，返回的指针所指向的对象也就消失了。
+swap(up, q) // 交换up和q中的指针
+up.swap(q)
+
+
+unique_ptr<T> u1 //空unqiue_ptr，可以指向类型为T的对象，u1会使用delete来释放它的指针。
+unique_ptr<T, D> u2 //空unique_ptr，可以指向类型为T的对象，u2会使用一个类型为D的可调用对象来释放它的指针。
+unique_ptr<T, D> u(d) //空unqiue_ptr,可以指向类型为T的对象，用类型为D的对象d代替delete。
+
+up = nullptr //释放up指向的对象，将u置为空
+up.release() // up放弃对指针的控制权，返回指针，并将u置为空。
+up.reset() //释放up指向的对象，如果提供了内置指针p,令up指向这个对象；否则将up置为空。
+up.reset(q)
+up.reset(nullptr) 
+```
+
+
+## 5.4 weak_ptr类
+### 5.4.1 weak_ptr的特点
+1. weak_ptr是一种弱引用，指向shared_ptr的管理对象，不能直接访问对象。 
+2. weak_ptr绑定到一个shared_ptr不会改变shared_ptr的引用计数器。 
+3. weak_ptr和shared_ptr同时指向一个对象时，当shared_ptr销毁时，该对象就会被释放，这就是它弱的特点。 
+4. weak_ptr提供了直接访问对象的函数lock，此函数会返回一个共享的shared_ptr对象，此时它就有了和shared_ptr类似的功能。 
+
+### 5.4.2 weak_ptr的基本操作
+```cpp
+weak_ptr<T> wp //空weak_ptr 可以指向类型为T的对象
+weak_ptr<T> wp(sp) //与shared_ptr 指向相同对象的weak_ptr。T必须能转换为sp所指的类型。
+wp = sp //sp可以是一个shared_ptr或者是一个weak_ptr。赋值后wp和sp共享对象。
+wp.reset() //将wp置空
+wp.use_count() //与wp共享对象的shared_ptr的数量
+wp.expired() //如果wp.use_count()为0，返回true,否则返回false。
+wp.lock() //如果expired为true，返回一个空的shared_ptr；否则返回一个指向wp的对象的shared_ptr。
+```
+
+1. 智能指针是一种模板，创建其时需要说明指向对象的类型。默认初始化的智能指针中保存着一个空指针。
+```cpp
+shared_ptr<Type> sp;
+```
+2. shared_ptr支持的操作
+```cpp
+shared_ptr<Type> sp //空智能指针，可以指向类型为T的对象。
+sp //将p用作一个条件判断，若p指向一个对象，则为true。
+*sp //解引用sp，获得它指向的对象
+sp->mem
+sp.get() // 返回sp中保存的智能指针。如果智能指针释放了其对象，返回的指针所指向的对象也就消失了。
+swap(p, q) // 交换p和q中的指针
+p.swap(q)
+make_shared<T> (args) //返回一个shared_ptr，指向一个动态分配的类型为T的对象。使用args初始化此对象。
+shared_ptr<T>p(q) // p是shared_ptr q的拷贝；此操作会递增q中的计数器。q中的指针必须能转换成T*。
+p = q //p和q都是shared_ptr，所保存的指针必须能相互转换。此操作会递减p的引用计数，递增q的引用计数；如果p的引用计数变为0，则将其管理的原内存释放。
+p.unique() //如果p.use_count()为1，返回true,否则返回false。
+p.use_count() //返回与p共享对象的智能指针数量
+```
 
 # 6. this指针
 1. this 指针是一个隐含于每一个非静态成员函数中的特殊指针，它指向调用还成员函数的那个对象；
