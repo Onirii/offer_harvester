@@ -6,7 +6,7 @@
 5. c++的头文件怎么给c项目使用
 6. 段错误怎样定位
 7. 编译和链接的区别！！！
-8. malloc和new的区别
+8. malloc和new的区别！！！
 9. 手写string的复制构造函数，拷贝构造函数，带参数构造函数，析构函数
 10. tcp怎么确认是否丢包，tcp的SYN序列号怎么生成，select使用了那些额外参数配置
 11. tcp服务器断电后，重新来电，客户端会接受什么
@@ -203,6 +203,111 @@
 例如，某个源文件中的函数可能引用了另一个源文件中定义的某个符号（如变量或者函数调用等）；在程序中可能调用了某个库文件中的函数，等等。所有的这些问题，都需要经链接程序的处理方能得以解决。<br>
 链接程序的主要工作就是将有关的目标文件彼此相连接，也就是将在一个文件中引用的符号同该符号在另外一个文件中的定义连接起来，使得所有的这些目标文件成为一个能够被操作系统装入执行的统一整体。<br>
 
+## 8. malloc和new的区别？
+
+1. **申请的内存所在位置**
+
+	1. **new操作符从自由存储区(free store)上为对象动态分配内存空间，而malloc函数从堆上动态分配内存。**
+
+	2. 自由存储区是C++基于new操作符的一个抽象概念，凡是通过new操作符进行内存申请，该内存即为自由存储区。而堆是操作系统中的术语，是操作系统所维护的一块特殊内存，用于程序的内存动态分配，C语言使用malloc从堆上分配内存，使用free释放已分配的对应内存。
+
+	3. 自由存储区是否能够是堆（问题等价于new是否能在堆上动态分配内存），这取决于operator new 的实现细节。自由存储区不仅可以是堆，还可以是静态存储区，这都看operator new在哪里为对象分配内存。
+
+2. **返回类型安全性**
+
+new操作符内存分配成功时，返回的是对象类型的指针，类型严格与对象匹配，无须进行类型转换，故new是符合类型安全性的操作符。而malloc内存分配成功则是返回void \* ，需要通过强制类型转换将void \*指针转换成我们需要的类型。 类型安全很大程度上可以等价于内存安全，类型安全的代码不会试图分配自己没被授权的内存区域。
+
+3. **内存分配失败时的返回值**
+
+new内存分配失败时，会抛出bac_alloc异常，它不会返回NULL；malloc分配内存失败时返回NULL。
+
+4. **是否需要指定内存大小**
+
+使用new操作符申请内存分配时无须指定内存块的大小，编译器会根据类型信息自行计算，而malloc则需要显式地指出所需内存的尺寸。
+```cpp
+class A{...};
+A * ptr = new A;
+A * ptr = (A *)malloc(sizeof(A)); //需要显式指定所需内存大小sizeof(A);
+```
+5. **是否调用构造函数/析构函数**
+
+	1. 使用new操作符来分配对象内存时会经历三个步骤：
+		1. 调用operator new 函数（对于数组是operator new[]）分配一块足够大的，原始的，未命名的内存空间以便存储特定类型的对象。
+		2. 编译器运行相应的构造函数以构造对象，并为其传入初值。
+		3. 对象构造完成后，返回一个指向该对象的指针。
+	2. 使用delete操作符来释放对象内存时会经历两个步骤：
+		1. 调用对象的析构函数。
+		2. 编译器调用operator delete(或operator delete[])函数释放内存空间。
+
+总之来说，**new/delete会调用对象的构造函数/析构函数以完成对象的构造/析构，而malloc则不会。**
+
+6. **对数组的处理**
+
+C++提供了new[]与delete[]来专门处理数组类型:
+```cpp
+A * ptr = new A[10];//分配10个A对象
+```
+使用new[]分配的内存必须使用delete[]进行释放：
+```cpp
+delete [] ptr;
+```
+new对数组的支持体现在它会分别调用构造函数函数初始化每一个数组元素，释放对象时为每个对象调用析构函数。注意delete[]要与new[]配套使用，不然会找出数组对象部分释放的现象，造成内存泄漏。
+
+至于malloc，它并不知道你在这块内存上要放的数组还是啥别的东西，反正它就给你一块原始的内存，在给你个内存的地址就完事。所以如果要动态分配一个数组的内存，还需要我们手动自定数组的大小：
+```cpp
+int * ptr = (int *) malloc( sizeof(int)* 10 );//分配一个10个int元素的数组
+```
+
+7. **是否可以相互调用**
+
+operator new /operator delete的实现可以基于malloc，而malloc的实现不可以去调用new。下面是编写operator new /operator delete 的一种简单方式，其他版本也与之类似：
+
+```cpp
+void * operator new (sieze_t size){
+    if(void * mem = malloc(size))
+        return mem;
+    else
+        throw bad_alloc();
+}
+
+void operator delete(void *mem) noexcept
+{
+    free(mem);
+}
+```
+
+8. **是否可以被重载**
+
+opeartor new /operator delete可以被重载。标准库是定义了operator new函数和operator delete函数的8个重载版本：
+
+```cpp
+//这些版本可能抛出异常
+void * operator new(size_t);
+void * operator new[](size_t);
+void * operator delete (void * )noexcept;
+void * operator delete[](void *0）noexcept;
+
+//这些版本承诺不抛出异常
+void * operator new(size_t ,nothrow_t&) noexcept;
+void * operator new[](size_t, nothrow_t& );
+void * operator delete (void *,nothrow_t& )noexcept;
+void * operator delete[](void *0,nothrow_t& ）noexcept;
+```
+用户可以自定义上面函数版本中的任意一个，前提是自定义版本必须位于全局作用域或者类作用域中。总之，用户有足够的自由去重载operator new /operator delete ,以决定其new与delete如何为对象分配内存，如何回收对象。
+
+而malloc/free并不允许重载。
+
+9. **是否能够直观地重新分配内存**
+
+使用malloc分配的内存后，如果在使用过程中发现内存不足，可以使用realloc函数进行内存重新分配实现内存的扩充。realloc先判断当前的指针所指内存是否有足够的连续空间，如果有，原地扩大可分配的内存地址，并且返回原来的地址指针；如果空间不够，先按照新指定的大小分配空间，将原有数据从头到尾拷贝到新分配的内存区域，而后释放原来的内存区域。
+
+new没有这样直观的配套设施来扩充内存。
+
+10. **客户处理内存分配不足**
+
+
+
+
 ## 9. 手写string的复制构造函数，拷贝构造函数，带参数构造函数，析构函数
 ```cpp
 class String 
@@ -262,7 +367,7 @@ String& String::operator=(const String &other)
 // String copy assignment的异常安全版本。
 String& String::operator =(const String &other){
 	if(this != other){
-		String Strtemp(other);
+		String Strtemp(other); //Strtemp为局部变量，当程序运行到if()外面时也就出了该变量的作用域，就会自动调用Strtemp的析构函数，把Strtemp.m_data指向的内存释放掉。由于Strtemp指向的内存就是实例之前m_data的内存，就相当于自动调用析构函数释放掉实例的内存。
 
 		char *temp = Strtemp.m_data;
 		Strtemp.m_data = m_data;
@@ -272,8 +377,11 @@ String& String::operator =(const String &other){
 }
 ```
 
-# 41. rand5(1-5的随机整数生成函数)实现rand7(1-7的随机整数生成函数)
-## 41.1 已知rand5()产生1-5的随机整数，利用该函数生成函数rand7()产生1-7的随机整数。
+## 20. std::thread和操作系统级别的线程有什么区别？
+
+
+## 41. rand5(1-5的随机整数生成函数)实现rand7(1-7的随机整数生成函数)
+### 41.1 已知rand5()产生1-5的随机整数，利用该函数生成函数rand7()产生1-7的随机整数。
 1. rand5()等概率生成1、2、3、4、5。
 2. 5 \* (rand5() - 1)等概率生成0、5、10、15、20。
 3. 5 \* (rand5() - 1) + rand5() 等概率生成1-25。出现1-25中任一结果只有一种特定的两个rand()组合，故等概率。
@@ -299,9 +407,8 @@ int rand7(){
 	return x%7 + 1;
 }
 ```
-## 20. std::thread和操作系统级别的线程有什么区别？
 
-## 41.2 已知randA()产生1-A的随机整数，利用该函数生成函数randB()产生1-B的随机整数。
+### 41.2 已知randA()产生1-A的随机整数，利用该函数生成函数randB()产生1-B的随机整数。
 1. 如果A > B，进入步骤2；否则构造randA2 = A * (randA – 1) + randA， 表示生成1到A2 随机数的函数。如果A2 仍小于B，继教构造 randA3 = A * (randA2 - 1) + randA…直到Ak > B，这时我们得到randAk , 我们记为randA。
 2. 步骤1中得到了randA(可能是randa或randAk )，其中A > B，可以用以下代码构造RandB：
 
