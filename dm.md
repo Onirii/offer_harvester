@@ -81,3 +81,84 @@ private:
 };
 ```
 懒汉式的Singleton::GetInstance()使用懒惰初始化，也就是说其返回值是当这个函数首次被访问时才创建的。所有GetInstance()之后的调用都返回相同实例的指针。
+
+### 2.2.3 多线程下的单例模式
+```cpp
+//单检查锁
+class Singleton
+{
+private:
+	static Singleton* m_Instance;
+	Singleton(){}
+	Singleton(const Singleton& other);
+	Singleton& operator=(const Singleton&);
+public:
+	static Singleton* GetInstance(){
+		Lock lock; //lock为局部变量，其生存周期为定义至函数结束，故对函数剩余部分加锁。
+		if(m_Instance == nullptr){ //检查
+			m_Instance = new Singleton();
+		}
+		return m_Instance;
+	}
+}
+//单检查锁的代价过高： m_Instance创建之后，线程对m_Instance的读操作不需要加锁。在高并发情况下，多个线程的m_Instance的读操作仍然加锁的话会造成资源浪费。
+```
+
+```cpp
+//双检查锁
+class Singleton
+{
+private:
+	static Singleton* m_Instance;
+	Singleton(){}
+	Singleton(const Singleton& other);
+	Singleton& operator=(const Singleton&);
+public:
+	static Singleton* GetInstance(){
+		if(m_Instance == nullptr){ //第一次检查
+			Lock lock; //加锁
+			if(m_Instance == nullptr){ //第二次检查
+				m_Instance = new Singleton();
+			}
+		}
+		return m_Instance;
+	}
+}
+
+//双检查锁两次检查的意义：
+//第一次检查：第一次检查负责检查是不是对m_Instance的读操作，如果m_Instance此时已经被创建(非nullptr)，则多线程只读m_Instance不需要加锁。
+//第二次检查：如果没有第二次检查，则在m_Instance未完全创建时，凡是通过第一次检查的线程均能获得lock，可能有多个m_Instance被创建。
+```
+
+
+```cpp
+//双检查锁的改进(内存读写reorder不安全)
+//以m_Instance = new Singleton(); 为例：定义m_Instance
+
+class Singleton
+{
+private:
+	Singleton* m_Instance;
+	Singleton(){}
+	Singleton(const Singleton& other);
+	Singleton& operator=(const Singleton&);
+public:
+	std::atomic<Singleton*> Singleton::m_Instance;
+	std::mutex Singleton::m_mutex;
+
+	Singleton* GetInstance(){
+		Singleton* temp = m_Instance.load(std::memory_order_relaxed);
+		std::atomic_thread_fence(std::memory_order_acquire);
+		if(temp == nullptr){
+			std::lock_guard<std::mutex> lock(m_mutex);
+			temp = m_Instance.load(std::memory_order_relaxed);
+			if(temp == nullptr){
+				temp = new Singleton();
+				std::atomic_thread_fence(std::memor_order_release);
+				m_Instance.store(temp, std::memory_order_relaxed);
+			}
+		}
+		return temp;
+	}
+}
+```
