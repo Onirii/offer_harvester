@@ -7,7 +7,7 @@
 6. 段错误怎样定位
 7. 编译和链接的区别！！！
 8. malloc和new的区别！！！
-9. 手写string的复制构造函数，拷贝构造函数，带参数构造函数，析构函数
+9. 手写string的复制构造函数，拷贝构造函数，带参数构造函数，析构函数！！！
 10. tcp怎么确认是否丢包，tcp的SYN序列号怎么生成，select使用了那些额外参数配置
 11. tcp服务器断电后，重新来电，客户端会接受什么
 12. 智能指针，weak_ptr怎么实现
@@ -285,7 +285,7 @@ opeartor new /operator delete可以被重载。标准库是定义了operator new
 void * operator new(size_t);
 void * operator new[](size_t);
 void * operator delete (void * )noexcept;
-void * operator delete[](void *0）noexcept;
+void * operator delete[](void *0)noexcept;
 
 //这些版本承诺不抛出异常
 void * operator new(size_t ,nothrow_t&) noexcept;
@@ -304,8 +304,6 @@ void * operator delete[](void *0,nothrow_t& ）noexcept;
 new没有这样直观的配套设施来扩充内存。
 
 10. **客户处理内存分配不足**
-
-
 
 
 ## 9. 手写string的复制构造函数，拷贝构造函数，带参数构造函数，析构函数
@@ -376,6 +374,14 @@ String& String::operator =(const String &other){
 	return *this;
 }
 ```
+
+## 14. 死锁产生的原因？死锁应该怎么预防？写出产生死锁的图解
+如果一组进程中的每一个进程**都在**等待仅由该组进程中的其他进程才能引发的时间，那么该组进程就是死锁的。<br>
+死锁是指两个或者两个以上的进程在执行过程中，因争夺资源而造成的相互等待的现象。死锁发生的四个必要条件如下:<br>
+1. **互斥条件**： 进程对所分配到的资源不允许其他进程访问，若其他进程访问该资源，只能等待，直至占有该资源的进程使用完成后释放该资源；
+2. **请求和保持条件**： 进程获得一定资源后，又对其他资源发出请求，但是该资源可能被其他进程占有。此时请求阻塞，但是该进程不会释放掉自己已经占有的资源；
+3. **不可抢占条件**： 进程已经获得的资源，在未使用完成前，不可被抢占，只能在使用后自己释放；
+4. **环路等待条件**： 进程发生死锁后，必然存在一个进程-资源之间的环形链。
 
 ## 20. std::thread和操作系统级别的线程有什么区别？
 
