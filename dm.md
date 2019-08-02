@@ -16,7 +16,7 @@ class Singleton
 public:
   static Singleton& GetInstance();
 private:
-  Singleton(){};
+  Singleton(){}
   Singleton(const Singleton&);
   Singleton& operator= (const Singleton&);
 private:
@@ -55,7 +55,7 @@ public:
 	static Singleton* GetInstance();
 };
 
-Singleton* Singleton::m_Instance = new Singleton;
+Singleton* Singleton::m_Instance = new Singleton();
 Singleton* Singleton::GetInstance()
 {
 	return m_Instance;
@@ -106,6 +106,8 @@ public:
 
 ```cpp
 //双检查锁
+std::mutex m_Mutex;
+
 class Singleton
 {
 private:
@@ -116,7 +118,7 @@ private:
 public:
 	static Singleton* GetInstance(){
 		if(m_Instance == nullptr){ //第一次检查
-			Lock lock; //加锁
+			std::unique_lock<std::mutex> myMutex(m_Mutex); //加锁
 			if(m_Instance == nullptr){ //第二次检查
 				m_Instance = new Singleton();
 			}
@@ -128,6 +130,7 @@ public:
 //双检查锁两次检查的意义：
 //第一次检查：第一次检查负责检查是不是对m_Instance的读操作，如果m_Instance此时已经被创建(非nullptr)，则多线程只读m_Instance不需要加锁。
 //第二次检查：如果没有第二次检查，则在m_Instance未完全创建时，凡是通过第一次检查的线程均能获得lock，可能有多个m_Instance被创建。
+//第二次检查：以上面单例模式为例，如果在第一个线程在经过第一次检查之后，时间片轮换，第二个线程也能经过第一次检查，即使有一个线程获得myMutex，在其执行完释放锁之后，如果没有第二次检查，通过第一次检查的其他线程依然会获得锁，继续执行，创建多余的实例。
 ```
 
 
