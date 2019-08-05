@@ -53,6 +53,7 @@
 ### 1.4.3 共享数据的保护
 
 ### 1.4.4 std::this_thread
+
 ```cpp
 std::this_thread::yield(); //当前线程放弃执行，操作系统调度另一线程继续执行。即当前线程将未使用完的“CPU时间片”让给其他线程使用，等其他线程使用完后再与其他线程一起竞争"CPU"。
 std::this_thread::get_id(); //获取当前线程的线程ID。
@@ -146,6 +147,7 @@ void sleep_until(const std::chrono::time_point<Clock, Duration>& abs_time);
 ### 1.9.2 std::packaged_task
 1. 类模板，模板参数是各种可调用对象，通过std::packaged_task可以把各种可调用对象包装起来，方便作为线程入口函数。
 2. 
+
 ```cpp
 std::packaged_task<returnType(paralist)> packagedName(functionName); //创建package_task
 std::thread threadName(std::ref(packagedName), paralist); //创建thread
@@ -160,6 +162,7 @@ result.get(); //获取异步线程执行结果
 ### 1.9.3 std::promise
 1. 类模板，在某个线程中可以给std::promise赋值，然后可以在其他线程中可以读取其值。
 2. 
+
 ```cpp
 std::promise<returnType> promiseName;  //创建std::promise
 std::thread threadName(functionName, std::ref(promiseName), paralist); //创建线程
@@ -187,6 +190,7 @@ std::promise是一个模板类: template<typename R> class promise。其泛型�
 ### 1.10.2 std::shared_future
 1. std::future的get()函数是一个移动语义，故其只能被调用一次。
 2. std::shared_future的get()不是转移数据，是复制数据，所以可以多次调用。
+
 ```cpp
 int mythread1(int mypara){
 	std::chrono::milliseconds duration(5000);
@@ -232,6 +236,7 @@ int main(){
 2. std::atomic
 	1. std::atomic<T>
 	2. std::atomic_flag
+
 ```cpp
 #include <iostream>       // std::cout
 #include <atomic>         // std::atomic, std::atomic_flag, ATOMIC_FLAG_INIT
@@ -286,6 +291,7 @@ int main ()
 1. RAII
 2. std::lock_guard<std::mutex>
 3. Windows下的自定义std::lock_guard<std::mutex>
+
 ```cpp
 //RAII类
 class CWINLock
@@ -330,8 +336,133 @@ private:
 
 ### 1.13.3 线程池
 
-
 ### 1.13.4 线程创建数量
 
-
 ### 1.13.5 总结
+
+# 2. 多线程实例
+## 2.1 
+1. 子线程循环10次，接着主线程循环100次，接着又回到子线程循环10次，接着再回到主线程又循环100次，如此循环50次，试写出代码。
+
+```cpp
+#include <iostream>
+#include <mutex>
+#include <condition_variable>
+
+
+```
+
+2. 编写一个程序，开启3个线程，这3个线程的ID分别为A、B、C，每个线程将自己的ID在屏幕上打印10遍，要求输出结果必须按ABC的顺序显示；如：ABCABC….依次递推。
+```cpp
+
+```
+
+3. 有四个线程1、2、3、4。线程1的功能就是输出1，线程2的功能就是输出2，以此类推.........现在有四个文件ABCD。初始都为空。现要让四个文件呈如下格式：
+A：1 2 3 4 1 2....
+
+B：2 3 4 1 2 3....
+
+C：3 4 1 2 3 4....
+
+D：4 1 2 3 4 1....
+
+```cpp
+
+```
+
+4. 有一个写者很多读者，多个读者可以同时读文件，但写者在写文件时不允许有读者在读文件，同样有读者读时写者也不能写。
+```cpp
+
+```
+
+5. STL中的queue是非线程安全的，一个组合操作：front(); pop()先读取队首元素然后删除队首元素，若是有多个线程执行这个组合操作的话，可能会发生执行序列交替执行，导致一些意想不到的行为，因此请重新设计线程安全的queue的接口。
+
+```cpp
+// 
+#include <mutex>
+#include <condition_variable>
+#include <queue>
+
+template<typename T>
+class threadsafe_queue
+{
+
+private:
+    mutable std::mutex mut;
+    std::queue<T> data_queue;
+    std::condition_variable data_cond;
+
+public:
+	//默认构造函数。
+    threadsafe_queue() {}
+    //赋值构造函数。
+    threadsafe_queue(threadsafe_queue const& other)
+    {
+        std::lock_guard<std::mutex> lk(other.mut);
+        data_queue = other.data_queue;
+    }
+    // 获得mutex后进行写操作
+    void push(T new_value)//入队操作  
+    {
+        std::lock_guard<std::mutex> lk(mut);
+        data_queue.push(new_value);
+        data_cond.notify_one();
+    }
+    // 直到有元素可以删除为止，引用传值将pop的元素赋值给非局部变量。
+    void wait_and_pop(T& value)
+    {
+
+        std::unique_lock<std::mutex> lk(mut);
+        //如果队列为空，则wait()继续堵塞，释放mutex。
+        //如果队列不为空，则继续执行，队首出队。
+        data_cond.wait(lk, [this] {return !data_queue.empty(); });
+        value = data_queue.front();
+        data_queue.pop();
+    }
+    // 直到有元素可以删除为止，返回指向被pop()元素的shared_ptr指针。
+    std::shared_ptr<T> wait_and_pop()
+    {
+        std::unique_lock<std::mutex> lk(mut);
+        data_cond.wait(lk, [this] {return !data_queue.empty(); });
+        std::shared_ptr<T> res(std::make_shared<T>(data_queue.front()));
+        data_queue.pop();
+        return res;
+    }
+    // 尝试pop()操作，不成功返回false，pop()成功返回true，并将被pop()元素传递给非局部变量。
+    bool try_pop(T& value)//不管有没有队首元素直接返回  
+    {
+        std::lock_guard<std::mutex> lk(mut);
+        if (data_queue.empty())
+            return false;
+        value = data_queue.front();
+        data_queue.pop();
+        return true;
+    }
+
+    std::shared_ptr<T> try_pop()
+    {
+        std::lock_guard<std::mutex> lk(mut);
+        if (data_queue.empty())
+            return std::shared_ptr<T>();
+        std::shared_ptr<T> res(std::make_shared<T>(data_queue.front()));
+        data_queue.pop();
+        return res;
+    }
+    bool empty() const
+    {
+        std::lock_guard<std::mutex> lk(mut);
+        return data_queue.empty();
+    }
+};
+```
+
+6. 编写程序完成如下功能：
+	1. 有一int型全局变量g_Flag初始值为0；
+	2. 在主线称中起动线程1，打印“this is thread1”，并将g_Flag设置为1；
+	3. 在主线称中启动线程2，打印“this is thread2”，并将g_Flag设置为2；
+	4. 线程序1需要在线程2退出后才能退出；
+	5. 主线程在检测到g_Flag从1变为2，或者从2变为1的时候退出。
+
+```cpp
+
+```
