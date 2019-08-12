@@ -27,7 +27,7 @@ static被引入以告知编译器，将变量存储在程序的静态存储区�
 
 ### 1.1.4 静态全局变量的特点
 1. 静态变量都在全局数据区分配内存；
-2. 未经初始化的静态全局变量会被程序自动初始化为0(在函数体内声明的变量的自动初始化值是随机的，在函数体外被声明的自动变量也会被初始化为0)；
+2. 未经初始化的静态全局变量会被程序自动初始化为0(在函数体内声明的变量的自动初始化值是随机的，在函数体外被声明的变量也会被自动初始化为0)；
 3. 静态全局变量在声明它的整个文件里都是可见的，在此文件外是不可见的。(在其他文件中可以定义相同名字的变量，不会发生冲突)。
 
 ### 1.1.5 静态局部变量的特点
@@ -65,7 +65,7 @@ static被引入以告知编译器，将变量存储在程序的静态存储区�
 
   
 ## 1.2 explicit关键字
-1. explicit关键字只需用于类内的单参数构造函数前面，防止类构造函数的隐式自动转换；
+1. explicit关键字只需用于类内的**单参数构造函数**前面，防止类构造函数的隐式自动转换；
 2. 对于无参数的构造函数和多参数的构造函数总是显式调用，这种情况在构造函数前加explicit没有意义。
 
 ## 1.2 volatile关键字
@@ -116,7 +116,7 @@ const修饰参数的值表示在函数体中不能修改此参数的值(包括�
 1. 类的成员函数后面加const，表明这个函数不会对类对象的非静态数据成员做任何修改。在设计类时，一个原则就是对于不改变数据成员的成员函数后面都要加const，而对于改变数据成员的成员函数不能用const修饰；
 2. 常量对象可以调用被const修饰的成员函数，而不能调用非const修饰的成员函数。
 
-### 1.3.3 const常量和define宏定义的区别
+### 1.3.3 const常量和define宏定义有什么区别？
 1. 编译器处理方式不同： define宏是在预处理阶段展开，const常量是编译运行阶段使用。
 2. 类型和安全检查不同： define宏没有类型，不做任何类型检查，仅仅是展开，const常量有具体的类型，在编译阶段会执行类型检查。
 3. 存储方式不同： define宏仅仅是展开，有多少地方使用，就展开多少次，不会分配内存，const常量会在内存中分配(可以是堆中也可以是栈中)。
@@ -126,10 +126,10 @@ const修饰参数的值表示在函数体中不能修改此参数的值(包括�
 
 ## 1.4 goto关键字
 goto语句允许把控制无条件转移到同一函数内的被标记的语句。<br>
-goto 语句一个很好的作用是**退出深嵌套例程**。
+goto 语句一个很好的作用是**退出深嵌套程序**。
 
 ## 1.5 sizeof关键字
-由于C++每种类型的大小都是有编译器自行决定的，为了增加可移植性，可以用sizeof运算符获得该数据类型占用的字节数。
+由于C++每种类型的大小都是由编译器自行决定的，为了增加可移植性，可以用sizeof运算符获得该数据类型占用的字节数。
 
 ### 1.5.1 数据对齐(Data Alignment)
 1. CPU的优化规则大致原则是：对于n字节的元素(n=2,4,8,...)，它的首地址能被n整除，才能获得最好的性能。
@@ -226,16 +226,11 @@ mutalbe的中文意思是“可变的，易变的”，跟constant（既C++中�
 3. 根据类型计算并添加偏移量，得到目标地址；
 4. 访问内存得到a[i]。
 
-
 # 4. C++中的野指针
-**野指针即指向不可用内存区域的指针。**<br>
-野指针不是NULL指针，是指向“垃圾”内存的指针，如果对野指针进行操作，将会使程序发生不可预知的错误，甚至可能直接引起程序崩溃。
-1. 指针变量没有初始化；<br>
-指针变量在创建时应当被初始化，要么将其设置为NULL，要么让它指向合法的内存。
-2. 指针指向的内存被释放了，但是指针本身没有被置NULL；<br>
-对于堆内存操作，我们分配了一些空间（使用malloc函数、calloc函数或new操作符），使用完后释放（使用free函数或delete操作符），在指针指向的内存被释放后，应该将指针置为NULL。
-3. 指针超过了变量的作用范围。<br>
-即在变量的作用范围之外使用了指向变量地址的指针。这一般发生在将调用函数中的局部变量的地址传出来。这点容易被忽略，虽然代码是很可能可以执行无误，然而却是极其危险的。局部变量的作用范围虽然已经结束，内存已经被释放，然而地址值仍是可用的，不过随时都可能被内存管理分配给其他变量。
+**野指针即指向不可用内存区域的指针。**野指针不是nullptr指针，是指向“垃圾”内存的指针，如果对野指针进行操作，将会使程序发生不可预知的错误，甚至可能直接引起程序崩溃。
+1. **指针变量没有初始化** 指针变量在创建时应当被初始化，要么将其设置为nullptr，要么让它指向合法的内存。
+2. **指针指向的内存被释放了，但是指针本身没有被置nullptr** 对于堆内存操作，我们分配了一些空间（使用malloc函数、calloc函数或new操作符），使用完后释放（使用free函数或delete操作符），在指针指向的内存被释放后，应该将指针置为nullptr。
+3. **指针超过了变量的作用范围。** 即在变量的作用范围之外使用了指向变量地址的指针。这一般发生在将调用函数中的局部变量的地址传出来。这点容易被忽略，虽然代码是很可能可以执行无误，然而却是极其危险的。局部变量的作用范围虽然已经结束，内存已经被释放，然而地址值仍是可用的，不过随时都可能被内存管理分配给其他变量。
 
 # 5. C++中的智能指针
 ## 5.1 直接内存管理、内存泄漏
@@ -268,7 +263,7 @@ auto stringName1 = new auto(stringName1); //stringName1的类型为string** 指�
 	1. new一个类对象是，会调用其构造函数，delete一个类对象时，对调用其析构函数。
 	2. new/delete具备对堆上所分配内存进行初始化/释放的能力，而malloc/free不具备这种能力。
 
-### 5.2.2 operator new 与 operator delete()
+### 5.2.2 operator new() 与 operator delete()
 1. operator new() 与 operator delete()是函数。
 2. new操作符先分配内存(通过调用 operator new())，然后调用构造函数来初始化内存。
 3. delete操作符先调用析构函数，然后释放内存(通过调用 operator delete())。
@@ -395,13 +390,130 @@ shared_ptr<T> make_shared_array(size_t size){
 
 ### 5.4.2 shared_ptr使用陷阱分析
 1. 慎用裸指针
+	1. 不允许从裸指针到shared_ptr的隐式类型转换。
+	2. 如果一个函数的形参是shared_ptr，在调用此函数时使用的形参是用裸指针初始化的临时shared_ptr对象，那么函数的实参中强引用值为1，当函数运行结束，实参作为临时变量要被销毁，那么此shared_ptr所管理的对象(裸指针所指向的对象)也会被释放，裸指针会失效，不能再使用。如果再使用此裸指针会出现不可预料的结果。
+	3. 把一个普通裸指针绑定到shared_ptr上之后，内存管理的责任就交给了shared_ptr。这个时候就不应该再使用裸指针来访问shared_ptr所指向的对象。
+	4. 不能用裸指针初始化多个shared_ptr。
+	5. 指向同一对象的shared_ptr共用一个控制块。
+
+```cpp
+int *P = new int(100); //裸指针
+shared_ptr<int> p1(P); //
+shared_ptr<int> p2(P); //p1、p2中的引用计数都为1，两个智能指针相互独立，所以如果依次释放p1和p2，那么裸指针P会被delete两次，产生异常。
+```
+
 2. 慎用get()返回的指针
+	1. 返回智能指针所指向对象对应的裸指针。
+	2. 引入get()的原因是有些函数参数类型为裸指针。
+	3. get()返回的指针不能随意delete，否则原智能指针无法正常管理对象。
+	4. 不能将其他智能指针绑定到get()返回的裸指针上。(类似于一个裸指针被绑定到两个shared_ptr上)
+
 3. 不要把类对象指针(this)作为shared_ptr返回，改用enable_shared_from_this
+	1. 
+
+```cpp
+class TEST
+{
+public:
+	shared_ptr<TEST> getself(){
+		return shared_ptr<TEST>(this); //类似于用裸指针初始化多个shared_ptr。
+		//获得的多个shared_ptr指向同一个对象，但并不共用一个控制块，这样会导致一个对象被析构多次。
+	}
+}
+
+class TEST ： public enable_shared_from_this<TEST>
+{
+public:
+	shared_ptr<TEST> getself(){
+		return shared_from_this(); //应该通过此方法返回智能指针。
+		//原理是weak_ptr的lock()方法。
+	}
+}
+
+int main(){
+	shared_ptr<TEST> ptr0(new TEST);
+	shared_ptr<TEST> ptr1(ptr0);
+
+	//如果
+	shared_ptr<TEST> ptr1 = ptr0->getself();
+}
+```
+
 4. 避免循环引用
+	1. shared_ptr的循环引用会导致内存泄漏。
+
+```cpp
+class TESTa{
+public:
+	shared_ptr<TESTb> ptra;
+	~TESTa(){
+		...
+	}
+}
+
+class TESTb{
+public:
+	shared_ptr<TESTa> ptrb;
+	~TESTb(){
+		...
+	}
+}
+
+int main(){
+	shared_ptr<TESTa> pca(new TESTa);
+	shared_ptr<TESTb> pcb(new TESTb);
+
+	pca->ptra = pcb; //等价于指向TESTb对象的有两个强引用。
+	pcb->ptrb = pca; //等价于指向TESTa对象的有两个强引用。
+	// 此时pca和pcb的强引用计数都为2。
+	// 程序结束时局部变量pca和pcb声明周期结束，其指向对象的强引用计数减一，变成1，但因为强引用计数不为0，故TESTa和TESTb对象都没有被释放。
+}
+```
+
+```cpp
+// 如何防止shared_ptr循环引用造成的内存泄漏？
+// 将可能循环引用的两个shared_ptr其中之一用weak_ptr替换。
+// 
+class TESTa{
+public:
+	shared_ptr<TESTb> ptra;
+	~TESTa(){
+		...
+	}
+}
+
+class TESTb{
+public:
+	weak_ptr<TESTa> ptrb;
+	~TESTb(){
+		...
+	}
+}
+
+int main(){
+	shared_ptr<TESTa> pca(new TESTa);
+	shared_ptr<TESTb> pcb(new TESTb);
+
+	pca->ptra = pcb; //指向TESTb的对象有两个强引用。
+	pcb->ptrb = pca; //因为ptr_b是weak_ptr，所以这里指向TESTa的对象的强引用计数还是1。
+	/*
+	程序结束时局部变量pca和pcb声明周期结束，其指向对象的强引用计数减一，此时TESTb的强引用计数变为1，TESTa的强引用计数变为0，TESTa对象被释放，TESTa的析构函数被执行，ptr_a的声明周期结束，TESTb的强引用计数再减一变为0。这样TESTa和TESTb对象都能被正确释放。
+	TESTa先析构，TESTb后析构。
+	*/
+}
+```
 
 ### 5.4.3 shared_ptr性能说明
 1. 尺寸问题
+	1. shared_ptr的尺寸是裸指针的两倍。
+	2. shared_ptr中包含两个裸指针，其一是指向type对象的指针，其二是指向控制块的指针。其中控制块中存储着该对象的强引用计数、弱引用计数和其它数据。
+	3. 控制块是由第一个指向某个指定对象的shared_ptr创建的，后来指向此对象的shared_ptr指向此控制块。
+	4. 控制块创建时机：
+		1. make_shared()分配并初始化一个对象，返回指向此对象的shared_ptr，所以make_shared()总能创建一个控制块。
+		2. 用裸指针来初始化一个shared_ptr对象时。
+	5. 自定义删除器不会影响shared_ptr的大小
 2. 移动语义
+	1. 用std::move(ptrName1)来初始化另外一个ptrName2。移动构造一个新的智能指针对象，ptrName1被置空，被指向对象的强引用计数仍然为1。
 
 ## 5.5 unique_ptr
 ### 5.5.1 unique_ptr概述
@@ -461,128 +573,185 @@ ptrarray[0] = 237; //可使用下标访问
 	2. std::move(unique_ptr) 可以将unque_ptr转换为右值。
 
 ### 5.5.3 返回unique_ptr
+1. 从函数返回一个局部的unique_ptr对象，此时的unqiue_ptr可以被拷贝，因为它即将被销毁。
+2. 对于调用函数返回的unique_ptr对象，如果没有用同类型的unique_ptr对象来接，则临时对象会被释放，同时会释放掉所指向的对象。
 
 ### 5.5.4 unique_ptr指定删除器
+1. 默认删除器为delete
+2. 指定删除器 unique_ptr<type, 删除器的类型> ptrName(...);
+3. unqiue_ptr删除器要先在类型模板中传递进去参数名，然后在参数中再给具体的删除器函数名。
+
+```cpp
+void mydeleter(string* pdel){
+	delete pedl;
+	pdel = nullptr;
+}
+//typedef
+typedef void(*fp1)(string*); //定义一个函数指针类型，类型名为fp。
+unique_ptr<string, fp1> ptrName(new string("TEST!!!"), mydeleter);
+
+//using
+using fp2 = void(*)(string *); //用using定义一个函数指针类型。
+unique_ptr<string, fp2> ptrName(new string("TEST!!!"), mydeleter);
+
+//typedef + decltype
+typedef decltype(mydeleter)* fp3; //decltype返回的是函数类型void(string*)，加*之后就成为函数指针类型 void* (string*)。
+unique_ptr<string, fp3> ptrName(new string("TEST!!!"), mydeleter);
+
+//lambda表达式，lambda表达式可以理解成带有operator()类类型对象。
+auto mydeleter = [](string *pdel){
+	delete pdel;
+	pdel = nullptr;
+	......
+}
+
+unique_ptr<string, decltype(mydeleter)> ptrName(new string("TEST!!!"), mydeleter);
+```
+
+4. 与shared_ptr指针不一样的是，删除器类型不用的unique_ptr，即使它们指向对象一样，也不属于同一类型unique_ptr，也就不能放到同一容器里。
 
 ### 5.5.5 尺寸问题
+1. 通常情况下unique_ptr智能指针与裸指针大小一致。
+2. 如果在unique_ptr中自定义删除器，其尺寸有可能变化(其他类型删除器)，也有可能不变化(lambda)。
 
 ## 5.6 智能指针总结
-
 ### 5.6.1 智能指针背后的设计思想
+1. **主要目的：** 帮助程序员释放内存，以防止忘记释放内存时造成的内存泄漏。
 
 ### 5.6.2 auto_ptr为什么被放弃
+1. C++98时代的智能指针，具有unique_ptr的一部分特性。
+2. 不能在容器中保存。
+3. 不能从函数中返回auto_ptr。
+4. auto_ptr支持同类型之间的赋值操作，不过赋值操作符右边的auto_ptr在操作后会被置空，这可能为以后的不正确操作留下隐患。
+5. 缺少对引用数和数组的支持。
 
 ### 5.6.3 智能指针的选择
+1. 如果程序要使用多个指向同一对象的指针，应该首选shared_ptr。
+2. 如果程序不需要多个指向同一对象的指针，应该首选unique_ptr。
 
-C++中的各种类型的对象，全局对象在程序启动时分配，在程序结束时销毁。局部自动对象在进入其定义所在的程序时被创建，在离开块时销毁。局部static对象在第一次使用前分配，在程序结束时销毁。动态分配的对象的生存期与它们在哪里被创建是无关的，只有当其被显式地释放时，这些对象才会被销毁。动态对象的正确释放是编程中极其容易出错的地方，为了更安全地使用动态对象，标准库定义了两个智能指针shared_ptr 和 unique_ptr 来管理动态分配的对象。当一个对象应该被释放时，指向它的智能指针可以确保自动地释放它。  
-## 5.1 auto_ptr类
-### 5.1.1 
-auto_ptr要求对它所拥有的指针完全占用，所以两个auto_ptr指针不能同时拥有一个一般指针，当前占有一般指针的auto_ptr会剥夺之前智能指针的所有权，如果此时再操作之前的智能指针就会发生错误。auto_ptr智能指针不能作为函数参数按值传递，而应该作为引用传递但又不能预测函数体内是否发生所有权的转移。auto_ptr在进行赋值和复制时会进行一些特殊操作，所以它不能作为C++STL中容器的元素。由于auto_ptr这些缺陷导致它已经被新的C++11标准抛弃啦。取而代之的是新标准中的shared_ptr、unique_ptr、weak_ptr这三种智能指针。 
+## 5.7 智能指针的其它问题
+### 5.7.1 智能指针有什么缺陷？
+1. 一般情况下，shared_ptr和weak_ptr的大小都是裸指针的两倍，因为它们之中除了保存原裸指针，还保存了一个指向控制块的指针。这样多少带来了内存上的消耗。
+2. shared_ptr的循环引用依然会造成内存泄漏，且不易察觉。
 
-## 5.2 shared_ptr类
-### 5.2.1 shared_ptr的功能
 
-### 5.2.2 shared_ptr的基本操作
+
+### 5.7.2 weak_ptr指向的对象不存在会怎样？
+
+### 5.7.3 智能指针的具体原理是什么？智能指针内部如何完成内存回收机制？
+#### 5.7.3.1 shared_ptr
+
 ```cpp
-shared_ptr<Type> sp //空智能指针，可以指向类型为T的对象。
-sp //将sp用作一个条件判断，若sp指向一个对象，则为true。
-*sp //解引用sp，获得它指向的对象
-sp->mem
-sp.get() // 返回sp中保存的智能指针。如果智能指针释放了其对象，返回的指针所指向的对象也就消失了。
-swap(sp, q) // 交换sp和q中的指针
-sp.swap(q)
-
-
-make_shared<T> (args) //返回一个shared_ptr，指向一个动态分配的类型为T的对象。使用args初始化此对象。
-shared_ptr<T>sp(q) // p是shared_ptr q的拷贝；此操作会递增q中的计数器。q中的指针必须能转换成T*。
-sp = q //p和q都是shared_ptr，所保存的指针必须能相互转换。此操作会递减sp的引用计数，递增q的引用计数；如果sp的引用计数变为0，则将其管理的原内存释放。
-sp.unique() //如果p.use_count()为1，返回true,否则返回false。
-sp.use_count() //返回与p共享对象的智能指针数量
+#include <iostream>
+#include <memory>
+#include <string>
+ 
+template <typename Object>
+class SmartPointer
+{
+public:
+    SmartPointer(Object * p = nullptr)
+        : m_ptr(p),
+        m_pRefCnt(new size_t{})
+    {
+        if(p)
+            *m_pRefCnt = 1;
+        else
+            *m_pRefCnt = 0;
+    }
+ 
+    ~SmartPointer()
+    {
+        releaseCount();
+    }
+    // copy constructor
+    SmartPointer(const SmartPointer & rhs)
+    {
+        if(this != &rhs) {
+            m_ptr = rhs.m_ptr;
+            m_pRefCnt = rhs.m_pRefCnt;
+            (*m_pRefCnt)++;
+        }
+    }
+ 
+    // move constructor
+    SmartPointer(SmartPointer && rhs)
+        :m_ptr{std::move(rhs.m_ptr)},
+        m_pRefCnt(rhs.m_pRefCnt)
+    {
+        rhs.m_ptr = nullptr;
+        rhs.m_pRefCnt = nullptr;
+    }
+ 
+    // assignment operator for copy
+    SmartPointer & operator = (const SmartPointer& rhs)
+    {
+        if(this != &rhs) {
+            releaseCount(); // release the current pointer.
+            m_ptr = rhs.m_ptr;
+            m_pRefCnt = rhs.m_pRefCnt;
+            (*m_pRefCnt)++;
+        }
+        return *this;
+    }
+ 
+    // assignment operator for move
+    SmartPointer & operator = (SmartPointer && rhs)
+    {
+        std::swap(m_ptr, rhs.m_ptr);
+        std::swap(m_pRefCnt, rhs.m_pRefCnt);
+        return *this;
+    }
+ 
+    Object & operator *() const
+    {
+        return *m_ptr;
+    }
+ 
+    Object * operator ->() const
+    {
+        return &this->operator*();
+    }
+private:
+     void releaseCount()
+    {
+        if (m_pRefCnt)
+        {
+            (*m_pRefCnt)--;
+            std::cout << "Descrease release count. Current Count " << (*m_pRefCnt) << std::endl;
+            if (*m_pRefCnt == 0)
+            {
+                delete m_ptr;
+                delete m_pRefCnt;
+                std::cout << "Free heap resource. Release count = 0" << std::endl;
+            }                  
+        }            
+    }
+ 
+ 
+    //
+private:
+    Object *m_ptr;
+    size_t *m_pRefCnt;
+};
+ 
+int main(int argc, char **argv)
+{
+    SmartPointer<int> i{new int{10}};
+    SmartPointer<int> j{new int{15}};
+    i = std::move(j);
+    std::cout << *i << std::endl;
+    std::cout << *j << std::endl;
+    return 0;
+}
 ```
-### shared_ptr注意事项
-1. 最安全的分配和使用动态内存的方法是调用make_shared函数，此函数在动态内存中分配一个对象并初始化它，返回指向此对象的shared_ptr。
-2. 与auto_ptr独占相比，shared_ptr允许多个指针拥有一个对象。 
-3. 默认创建的指针是一个空指针，解引用一个智能指针返回它指向的对象。 
-4. 每个shared_ptr都有一个关联的引用计数器。当我们拷贝一个shared_ptr时计数器的值会递增；当我们给它赋一个新值或者销毁它时计数器会递减。 
-5. 自动销毁所管理的对象。由于智能指针都是类，它有自己的析构函数，当它的引用计数器变为0时会自动调用析构函数销毁该对象。 
-6. 和new结合使用，默认的shared_ptr是一个空指针，可以使用new来给它初始化，但不可以直接初始化。例如：shared_ptr p1(new int(100))可以,shared_ptrp2 = new int(100)不可以。
+#### 5.7.3.2 weak_ptr
 
-### 5.2.2 shared_ptr是否存在内存泄漏的情况？应该怎么解决？
-当两个对象相互使用一个shared_ptr成员变量指向对方，会造成循环引用，使引用计数失效，从而导致内存泄漏。
-为了解决循环引用导致的内存泄漏，引入了weak_ptr弱指针，weak_ptr的构造函数不会修改引用计数的值，从而不会对对象的内存进行管理，其类似一个普通指针，但不指向引用计数的共享内存，但是其可以检测到所管理的对象是否已经被释放，从而避免非法访问。
+#### 5.7.3.3 unique_ptr
 
-## 5.3 unique_ptr类
-### 5.3.1 unique_ptr特点
-1. 与shared_ptr不同，unique_ptr是独占所拥有的对象。所以当unique_ptr被销毁时它指向的对象也会被销毁。 
-2. shared_ptr提供了一个make_shared的标准函数库来返回shared_ptr，而unique_ptr则没有类似的函数。当我们定义一个unique_ptr时需要使用new来为其直接初始化。 
-3. 由于(1)的原因，它不支持普通的拷贝和复制操作。 
-4. unique_ptr提供了release和reset方法将指针的所有权转移。例如： 
-unique_ptr p1(new string(“ISMILELI”)); 
-unique_ptr p2(p1.release()); // 将p1置空并将所有权给p2 
-unique_ptr p3(new string(“hello world”)); 
-p2.reset(p3.release()); // reset释放了p2原来的内存并把p3的所有权转移给了p2。 
-5. release切断了unique_ptr和它所管理的对象之间的联系。release的返回值一般用来初始化另一个智能指针或者给另一个智能指针赋值。如果给一个普通的指针赋值的话就需要我们自己手动释放该普通指针的内存才行。 
+### 5.7.4 如果出现智能指针循环引用，不用weak_ptr怎么样能避免内存泄漏？
 
-### 5.3.2 unique_ptr的基本操作
-```cpp
-shared_ptr<Type> up //空智能指针，可以指向类型为T的对象。
-up //将up用作一个条件判断，若up指向一个对象，则为true。
-*up //解引用up，获得它指向的对象
-up->mem
-up.get() // 返回sp中保存的智能指针。如果智能指针释放了其对象，返回的指针所指向的对象也就消失了。
-swap(up, q) // 交换up和q中的指针
-up.swap(q)
-
-
-unique_ptr<T> u1 //空unqiue_ptr，可以指向类型为T的对象，u1会使用delete来释放它的指针。
-unique_ptr<T, D> u2 //空unique_ptr，可以指向类型为T的对象，u2会使用一个类型为D的可调用对象来释放它的指针。
-unique_ptr<T, D> u(d) //空unqiue_ptr,可以指向类型为T的对象，用类型为D的对象d代替delete。
-
-up = nullptr //释放up指向的对象，将u置为空
-up.release() // up放弃对指针的控制权，返回指针，并将u置为空。
-up.reset() //释放up指向的对象，如果提供了内置指针p,令up指向这个对象；否则将up置为空。
-up.reset(q)
-up.reset(nullptr) 
-```
-
-
-## 5.4 weak_ptr类
-### 5.4.1 weak_ptr的特点
-1. weak_ptr是一种弱引用，指向shared_ptr的管理对象，不能直接访问对象。 
-2. weak_ptr绑定到一个shared_ptr不会改变shared_ptr的引用计数器。 
-3. weak_ptr和shared_ptr同时指向一个对象时，当shared_ptr销毁时，该对象就会被释放，这就是它弱的特点。 
-4. weak_ptr提供了直接访问对象的函数lock，此函数会返回一个共享的shared_ptr对象，此时它就有了和shared_ptr类似的功能。 
-
-### 5.4.2 weak_ptr的基本操作
-```cpp
-weak_ptr<T> wp //空weak_ptr 可以指向类型为T的对象
-weak_ptr<T> wp(sp) //与shared_ptr 指向相同对象的weak_ptr。T必须能转换为sp所指的类型。
-wp = sp //sp可以是一个shared_ptr或者是一个weak_ptr。赋值后wp和sp共享对象。
-wp.reset() //将wp置空
-wp.use_count() //与wp共享对象的shared_ptr的数量
-wp.expired() //如果wp.use_count()为0，返回true,否则返回false。
-wp.lock() //如果expired为true，返回一个空的shared_ptr；否则返回一个指向wp的对象的shared_ptr。
-```
-
-1. 智能指针是一种模板，创建其时需要说明指向对象的类型。默认初始化的智能指针中保存着一个空指针。
-```cpp
-shared_ptr<Type> sp;
-```
-2. shared_ptr支持的操作
-```cpp
-shared_ptr<Type> sp //空智能指针，可以指向类型为T的对象。
-sp //将p用作一个条件判断，若p指向一个对象，则为true。
-*sp //解引用sp，获得它指向的对象
-sp->mem
-sp.get() // 返回sp中保存的智能指针。如果智能指针释放了其对象，返回的指针所指向的对象也就消失了。
-swap(p, q) // 交换p和q中的指针
-p.swap(q)
-make_shared<T> (args) //返回一个shared_ptr，指向一个动态分配的类型为T的对象。使用args初始化此对象。
-shared_ptr<T>p(q) // p是shared_ptr q的拷贝；此操作会递增q中的计数器。q中的指针必须能转换成T*。
-p = q //p和q都是shared_ptr，所保存的指针必须能相互转换。此操作会递减p的引用计数，递增q的引用计数；如果p的引用计数变为0，则将其管理的原内存释放。
-p.unique() //如果p.use_count()为1，返回true,否则返回false。
-p.use_count() //返回与p共享对象的智能指针数量
-```
+### 5.7.5 
 
 # 6. this指针
 1. this 指针是一个隐含于每一个非静态成员函数中的特殊指针，它指向调用还成员函数的那个对象；
@@ -642,48 +811,6 @@ p.use_count() //返回与p共享对象的智能指针数量
 5. 栈是向低地址扩展的数据结构，是一块连续的内存区域。
 
 # 9. C++11 的新基础特性
-## 9.1 预定义宏
-**使用这些宏，可以检查机器环境对C标准和C库的支持情况。**<br>
-1. \_\_STDC\_HOSTED\_\_ 如果编译器的目标系统环境中包含完整的标准C库，那么这个宏就定义为1，否则宏的值为0。
-2. \_\_STDC\_\_ C编译器通常用这个宏的值来表示编译器的实现是否与C标准一致，C++11标准中这个宏是否定义以及定成什么值由编译器决定。
-3. \_\_STDC\_VERSION\_\_ C编译器通常用这个宏来表示所支持的C标准的版本，比如1999mmL。C++11标准中这个宏是否定义以及定成什么值将由编译器决定。
-4. \_\_STDC\_ISO\_10646\_\_ 这个宏通常定义为一个yyyymmL格式的整数常量，例如199712L，用来表示C++编译环境复合某个版本的ISO/IEC10646标准。
-
-## 9.2 \_\_func\_\_ 用于获取当前函数名字字符串的宏
-
-## 9.3 \_Pragma 操作符
-预处理指令#pragma 的作用是设定编译器的状态或者是指示编译器完成一些特定的动作。<br>
-\_Pragma预处理操作符与#pragma功能相同，**\_Pragma 可以在宏中展开**。
-
-## 9.4 变长参数的宏定义以及 \_\_VA\_ARGS\_\_
-变长参数的宏定义是指在宏定义中参数列表的最后一个参数为省略号，而预定义__VA_ARGS__ 则可以在宏定义的实现部分替换省略号所代表的字符串。<br>
-
-## 9.5 宽窄字符串的连接
-在C++11标准中，在将窄字符串(char:ANSI)和宽字符串(wchar_t:UNICODE)进行连接时，支持C++11标准的编译器会将窄字符串转换成宽字符串，然后再与宽字符串进行连接。
-
-## 9.6 long long 整型
-在C++11中，标准要求long long 整型可以在不同平台上有不同的长度，但至少有64位。
-
-## 9.7 宏 \_\_cplusplus 
-
-## 9.8 静态断言
-断言帮助开发者快速定位问题违反程序前提条件的错误，不过断言只在程序运行时执行，这在某些情况下，是不可接受的，特别是对于模板实例化时出现的错误，应该在编译器就确定。在C++11中引入了static_assert断言来解决问题，它支持两个参数输入，一个是返回bool型的表达式，另一个是警告信息。
-
-## 9.9 noexcept修饰符和noexcept操作符
-
-## 9.10 快速初始化成员变量
-
-## 9.11 非静态成员的sizeof
-
-## 9.12 扩展的friend语法
-
-## 9.13 final/override控制
-
-## 9.14 模板函数的默认模板参数
-
-## 9.15 外部模板
-
-## 9.16 局部和匿名类型作模板实参
 
 
 # 10. C/C++ 程序编译流程
@@ -744,17 +871,65 @@ p.use_count() //返回与p共享对象的智能指针数量
 
 
 # 12. C++中的虚函数(表)实现机制
+C++对象的内存布局
 ## 12.1 只有数据成员的类对象
 成员变量是按照定义的顺序来保存的，最先声明在低地址，然后依次保存。类对象的大小是所有成员变量大小之和。(是否有字节对齐？)
 
+```cpp
+class Base1
+{
+public:
+	int base1_1;
+	int base1_2;
+};
+```
+sizeof(Base1)|8
+-|-
+offsetof(Base1, base1_1)|0
+offsetof(Base1, base1_1)|0
+
 ## 12.2 没有虚函数的类对象
-如果一个函数不是虚函数，那么就可能发生动态绑定，也就不会对类对象的布局造成任何影响。<br>
-当调用一个非虚函数时，那么调用的一定就是当前指针类型拥有的那个成员函数，这种调用机制在编译时期就确定下来了。
+如果一个函数不是虚函数，那么就不可能发生动态绑定，也就不会对类对象的布局造成任何影响。<br>
+当调用一个非虚函数时，那么调用的一定就是当前指针类型拥有的那个成员函数，这种调用机制在**编译**时期就确定下来了。
+
+```cpp
+class Base1
+{
+public:
+	int base1_1;
+	int base1_2;
+
+	void foo(){}
+};
+```
+sizeof(Base1)|8
+-|-
+offsetof(Base1, base1_1)|0
+offsetof(Base1, base1_1)|0
 
 ## 12.3 仅拥有一个虚函数的类对象
 相对于没有虚函数的类对象，仅拥有一个虚函数的类对象的内存分布开始时会多一个类型为void\*\*的指针(\_\_vfptr, 虚函数表(vtable)指针)，所占内存大小为一个指针大小。
+
+```cpp
+class Base1
+{
+public:
+    int base1_1;
+    int base1_2;
+
+    virtual void base1_fun1() {}
+};
+```
+
+sizeof(Base1)|12
+-|-
+offsetof(__vfptr)|0
+offsetof(Base1, base1_1)|4
+offsetof(Base1, base1_1)|8
+
 ### 12.3.1 为什么\_\_vfptr被定义成一个指向指针数组的指针，而不是直接定义成一个指针数组？
 如果仅是一个指针的话，就无法轻易修改那个数组里面的内容，因为虚函数表并不属于类对象的一部分，属于类对象的，仅是一个指向虚函数表的指针\_\_vfptr而已。
+
 ## 12.4 拥有多个虚函数的类对象
 1. \_\_vfptr只是一个指针，指向一个函数指针数组(虚函数表)。
 2. 增加一个虚函数，只是简单地向该类对应的虚函数表中增加一项而已，并不会影响到类对象的大小和布局情况。
@@ -762,20 +937,141 @@ p.use_count() //返回与p共享对象的智能指针数量
 4. 虚函数表是编译器在编译时期创建的。
 5. 定义类对象时，编译器自动将类对象的\_\_vfptr指向该类的虚函数表。
 
+```cpp
+class Base1
+{
+public:
+    int base1_1;
+    int base1_2;
+
+    virtual void base1_fun1() {}
+    virtual void base1_fun2() {}
+};
+```
+
+sizeof(Base1)|12
+-|-
+offsetof(__vfptr)|0
+offsetof(Base1, base1_1)|4
+offsetof(Base1, base1_1)|8
+
 ## 12.5 单继承且本身不存在虚函数的继承类的内存布局
 基类的内存布局+自身独有的成员数据布局。<br>
 
+```cpp
+class Base1
+{
+public:
+    int base1_1;
+    int base1_2;
+
+    virtual void base1_fun1() {}
+    virtual void base1_fun2() {}
+};
+
+class Derive1 : public Base1
+{
+public:
+    int derive1_1;
+    int derive1_2;
+};
+```
+
+
+
 ## 12.6 本身没有定义新的虚函数但存在基类虚函数覆盖的单继承类的内存布局   
 基类中在派生类里被覆盖掉的虚函数，其对应的派生类虚函数表的中的函数指针也会被相应地覆盖。
+
+```cpp
+class Base1
+{
+public:
+    int base1_1;
+    int base1_2;
+
+    virtual void base1_fun1() {}
+    virtual void base1_fun2() {}
+};
+
+class Derive1 : public Base1
+{
+public:
+    int derive1_1;
+    int derive1_2;
+
+    // 覆盖基类函数
+    virtual void base1_fun1() {}
+};
+```
+
 
 ## 12.7 定义了基类没有的虚函数的单继承的类对象布局
 1. 派生类的虚函数表被加在基类的虚函数表后面。
 2. 派生类新加的虚函数指针对基类的虚函数表不会有影响。  
 
+```cpp
+class Base1
+{
+public:
+    int base1_1;
+    int base1_2;
+
+    virtual void base1_fun1() {}
+    virtual void base1_fun2() {}
+};
+
+class Derive1 : public Base1
+{
+public:
+    int derive1_1;
+    int derive1_2;
+
+    virtual void derive1_fun1() {}
+};
+```
+
 ## 12.8 多继承且存在虚函数覆盖同时又存在自身定义的虚函数的类对象布局
 1. 按照基类的声明顺序, 基类的成员依次分布在继承中。
 2. 在派生类中被覆盖的虚函数在基类虚函数表中的指针会被相应地覆盖。
 3. 派生类的虚函数表保存在第一个拥有虚函数表的基类的虚函数表后面。
+
+```cpp
+class Base1
+{
+public:
+    int base1_1;
+    int base1_2;
+
+    virtual void base1_fun1() {}
+    virtual void base1_fun2() {}
+};
+
+class Base2
+{
+public:
+    int base2_1;
+    int base2_2;
+
+    virtual void base2_fun1() {}
+    virtual void base2_fun2() {}
+};
+
+// 多继承
+class Derive1 : public Base1, public Base2
+{
+public:
+    int derive1_1;
+    int derive1_2;
+
+    // 基类虚函数覆盖
+    virtual void base1_fun1() {}
+    virtual void base2_fun2() {}
+
+    // 自身定义的虚函数
+    virtual void derive1_fun1() {}
+    virtual void derive1_fun2() {}
+};
+```
 
 ## 12.9 如果第一个直接基类没有虚函数(表)
 1. 有虚函数表的基类会放在对象内存的前面。
@@ -786,62 +1082,153 @@ p.use_count() //返回与p共享对象的智能指针数量
 ## 12.11 多(3)继承的三个基类的虚函数(表)分别是有、没有、有
 1. 对象内存分布中会按顺序分布拥有虚函数表的基类、其他基类、派生类。
 
-# 13. 四种强制类型转换操作符
-**cast-name<type>(expression)**
+# 13. lambda表达式 
+## 13.1 lambda表达式用法简介
+1. C++11新特性。
+2. 可调用对象，定义了一个匿名函数，并且能捕获一定范围内的变量。
+3. [capture list](paramslist) mutable exception -> return type { function body };
+	1. capture list：捕获外部变量列表，[]不能省略
+    2. paramslist：形参列表 ()可以省略
+    3. mutable指示符：用来说用是否可以修改捕获的变量
+    4. exception：异常设定
+    5. return type：返回类型
+    6. function body：函数体 {}不能省略
+4. 匿名函数、可调用的代码单元、未命名的inline函数。
+5. lambda表达式可以在函数内部定义，这是常规函数做不到的。
+6. 将lambda表达式赋值给一个auto变量，相当于创建了一个函数，此函数与普通函数调用方式相同。
 
-## 13.1 static_cast
-主要用于非多态类型之间的转换，不提供运行时的检查来确保转换的安全性。主要在以下几种场合中使用：<br>
-1. 用于类层次结构中，基类和子类之间指针和引用的转换；<br>
-当进行上行转换，也就是把子类的指针或引用转换成父类表示，这种转换是安全的；<br>
-当进行下行转换，也就是把父类的指针或引用转换成子类表示，这种转换是不安全的，也需要程序员来保证；<br>
-2. 用于基本数据类型之间的转换，如把int转换成char，把int转换成enum等等，这种转换的安全性需要程序员来保证；
-3. 把void指针转换成目标类型的指针，是极其不安全的；
+## 13.2 捕获列表
+1. lambda表达式通过捕获列表来捕获一定范围内的变量。
+2. lambda表达式默认不捕获任何变量，但是可以直接使用局部静态变量。(局部静态变量不需要捕获)
+3. [&]捕获外部作用域中所有变量，并作为引用在函数体中使用。(引用传递)
+4. [=]捕获外部作用域中所有变量，并按值在函数体中使用。(值传递，不能在函数体内对捕获的变量赋值)
+5. [this]用于类中，捕获当前类中的this指针，让lambda表达式有和当前类成员函数同样的访问权限。
+6. 如果[]中已经使用了&或者=，那么默认就使用了this。
+7. [变量名]按值捕获变量名代表的变量。
+8. [&变量名]按引用捕获变量名代表的变量。
+9. [=, &变量名1, &变量名2......]按值捕获外部作用域中所有变量，但是按引用捕获变量名所代表的变量，=必须写在开头位置。
+10. [&, =变量名1, =变量名2......]按引用捕获外部作用域中所有变量，但是按值捕获变量名所代表的变量，&必须写在开头位置。
 
-## 13.2 dynamic_cast
-### 13.2.1 转换方式
-1. dynamic_cast<type*>(e) type必须是一个类类型且必须是一个有效的指针
-2. dynamic_cast<type&>(e) type必须是一个类类型且必须是一个左值
-3. dynamic_cast<type&&>(e) type必须是一个类类型且必须是一个右值<br>
+## 13.3 lambda表达式延迟调用易出错细节分析
+1. lambda表达式的延迟调用
 
-e的类型必须符合以下三个条件中的任何一个：<br>
-1. e的类型是目标类型type的公有派生类
-2. e的类型是目标类型type的公有基类
-3. e的类型就是目标type的类型
+```cpp
+int x = 5;
+auto f = [=](){  //当遇到lambda表达式起始这一行，labmda表达式就完成了需要按值捕获变量的捕获工作。
+				 //也就是说，凡是按值捕获的外部变量，在lambda表达式定义的这个时刻，这部分外部变量就被复制了一份存储在了lambda表达式中。
+	return x;
+};
 
-其他要点:<br>
-1. 如果一条dynamic_cast语句的转换目标是指针类型并且失败了，则结果为0。
-2. 如果转换目标是引用类型并且失败了，则dynamic_cast运算符将抛出一个std::bad_cast异常(该异常定义在typeinfo标准库头文件中)。
-3. e也可以是一个空指针，结果是所需类型的空指针。
-4. dynamic_cast主要用于类层次间的上行转换和下行转换，还可以用于类之间的交叉转换(cross cast)。
-5. 在类层次间进行上行转换时，dynamic_cast和static_cast的效果是一样的。
-6. 在类层次间进行下行转换时，dynamic_cast具有类型检查的功能，比static_cast更安全。 
-7. dynamic_cast是唯一无法由旧式语法执行的动作，也是唯一可能耗费重大运行成本的转型动作。
+x = 10;
 
-### 13.2.2 
+cout<<f()<<endl;  //输出为5
+```
 
+2. 如果希望在lambda表达式调用时获取当前实时的外部变量的值，应该在捕获变量时使用按引用捕获。
 
-## 13.3 const_cast
+## 13.4 lambda表达式中的mutable
+1. 被mutable修饰的lambda表达式可以在函数体中修改即使是按值捕获的外部变量。
 
+## 13.5 lambda表达式的类型及存储
+1. C++11中lambda表达式被称为闭包类型(closure)。
+2. 闭包：函数内的函数，是一种可调用对象，本质上是lambda表达式创建的运行时期的送对象。
+3. lambda表达式是一种比较特殊的，匿名的，类类型(闭包类)的对象(定义了一个类类型，又生成了一个该类型的匿名对象)。
 
-## 13.4 reinterpret_cast
+```cpp
+std::function<int(int)> fc1 = [](int tv) {return tv};
 
+std::function<int(int)> fc2 = std::bind(
+	[](int tv){
+		return tv;
+	}
+	16;
+	);
 
-# 14. 隐式类型转换
+//不捕获任何变量的lambda表达式(也就是捕获列表为空)，可以转换成一个普通的函数指针。
+using functype = int(*)(int); //定义一个函数指针类型。
+functype fp = [](int tv){return tv;}; //用函数指针来接lambda表达式。
+```
+### 13.5.1 语法糖概念
+1. 语法糖是一种便捷写法的意思。
+2. 语法糖是指基于语言现有特性，构造出一个使用起来很方便的东西，但是没有增加语言的原有功能。
+3. lambda表达式可以看成是定义仿函数闭包的语法糖。
+
+## 13.6 lambda表达式的优点总结
+### 13.6.1 for_each
+1. #include <algorithm>
+2. 函数模板
+
+### 13.6.2 find_if
+1. #include <algorithm>  
+2. 函数模板
+3. 查找
+
+## 13.7 lambda表达式捕获模式的陷阱分析
+### 13.7.1 捕获列表中的&
+1. 捕获外部作用域中的所有变量，并作为引用在lambda表达式中使用。
+2. 按照这种捕获方式，会导致lambda表达式包含绑定到局部变量的引用。
+
+```cpp
+#include <ctime>
+using namespace std;
+
+std::vector<std::function<bool(int)>> funcList; //全局变量，每个元素都是function(形参类型为int，返回类型为bool)
+
+void rand5(){
+	srand((unsigned)time(NULL));
+	int tempValue = rand() % 6; //产生一个0-5的随机数。
+
+	funcList.push_back(
+		[&](int tv){
+			if(tv % tempValue == 0) return true;
+			else return false;
+		}
+	);
+}
+
+int main(){
+	rand5();
+	cout << funcList[0](10) << endl; //此时调用funcList[0]
+	// funcList[0]的实质lambda表达式中对外部变量的捕获是按引用捕获的，而外部变量在rand5()执行结束之后已经失效。
+	// 故funcList[0]此时捕获到的是无效变量，这样会导致程序崩溃。
+	// 按值捕获可以解决上述问题。(引用捕获超出范围的问题，引用悬空)
+}
+```
+
+### 13.7.2 形参列表可以使用auto C++14
+
+### 13.7.3 成员变量的捕获问题
+1. lambda表达式的捕获，只针对在创建lambda表达式作用域内可见的非静态局部变量。因此类的成员变量并不能被捕获到，要想在lambda表达式中使用类中的成员变量，只能捕获this指针，然后通过this指针调用类的成员变量。
+2. 可以通过在lambda表达式中创建捕获变量的副本来避免捕获变量失效的问题。
+
+### 13.7.4 广义lambda捕获 C++14
+
+### 13.7.5 静态局部变量
+
+# 14. 类型转换
+## 14.1 隐式类型转换
 C++定义了一组内置类型对象之间的标准转换，在必要时它们被编译器隐式地应用到对象上。隐式类型转换发生在以下这些典型情况下：<br>
 1. 在混合类型的算数表达式中： 目标转换类型是最宽的数据类型。(算数转换，Arithmetic Conversion)
 2. 用一种类型的表达式赋值给另一种类型的对象： 目标转换类型是被赋值对象的类型。
 3. 把一个表达式传递给一个函数，调用表达式的类型与形式参数的类型不相同： 目标转换类型是形式参数的类型。
 4. 从一个函数返回一个表达式的类型与返回类型不相同： 目标转换类型是返回类型。
 
-## 14.1 算数转换
+### 14.1.1 算数转换
 算数转换保证了二元操作符，如加法或乘法的两个操作数被提升为相同的类型，然后再用它表示结果的类型。<br>
 
-### 14.1.1 算数转换的通用指导原则
+#### 14.1.1.1 算数转换的通用指导原则
 1. 为了防止精度损失，如果有必要的话，类型总是被提升为较宽的类型。
 2. 所有含有小于整型的有序类型的算数表达式在计算之前其类型都会被转换成整型。
 
-### 14.1.2 整值提升
+## 14.2 显示类型转换/强制类型转换
+### 14.2.1 static_cast
 
+
+### 14.2.2 dynamic_cast
+
+### 14.2.3 const_cast
+
+### 14.2.4 reinterpret_cast
 
 # 15. C++常用库函数
 
@@ -1058,20 +1445,7 @@ i = i + 1;
 1. C++11引用的新函数。
 2. 把一个左值强制转化为右值。
 
-## 18.6 总结
-
-## 18.1 左值与右值
-一个左值表达式的求值结果是一个对象或者一个函数，然而以常量对象为代表的某些左值实际上不能作为赋值语句的左侧运算对象，但它们是右值而非左值。可以做一个简单的归纳：当一个对象被用作右值的时候，用的是对象的值(内容)；当对象被用作左值的时候，用的是对象的身份(在内存中的位置)。<br>
-不同的运算符对运算对象的要求也各不相同有的需要左值运算对象、有的需要右值运算对象；返回值也有差异，有的得到左值结果，有的得到右值结果。一个重要的原则是：在需要右值的地方可以用左值的代替，但是不能把右值当做左值(也就是位置)使用。当一个左值被当做右值使用时，实际使用的是它的内容(值)。下面常用的运算符是要用的左值的：
-1. 赋值运算符需要一个(非常量)左值作为其左侧运算符，得到的结果也仍然是一个左值。
-2. 取地址符作用于一个左值运算对象，返回一个指向该运算对象的指针，这个指针是一个右值。
-3. 内置解引用运算符、下标运算符、迭代器解引用运算符、string和vector的下标运算符的求值结果都是左值。
-4. 内置类型和迭代器的递增递减运算符作用于左值。
-5.
-6. 
-
-
-## 18.2 左值引用与右值引用的区别
+## 18.6 左值引用与右值引用的区别
 1. 右值引用就是必须绑定到右值的引用，通过&&获得。右值引用只能绑定到一个将要销毁的对象上，因此可以自由地移动其资源。
 2. 左值引用不能绑定到要转换的表达式、字面常量或返回右值的表达式。而右值引用恰好相反，可以绑定到这类表达式，但不能绑定到一个左值上。
 3. 返回左值的表达式包括返回左值引用的函数及赋值、下标、解引用和前置递增/递减运算符，返回右值的包括返回非引用类型的函数及算术、关系、位和后置递增/递减运算符。可以看到，左值的特点是有持久的状态，而右值是短暂的。
@@ -1101,7 +1475,7 @@ i = i + 1;
 Java和C++都是面向对象语言。也就是说，它们都能够实现面向对象思想（封装，继乘，多态）。而由于C++为了照顾大量的C语言使用者，而兼容了C，使得自身仅仅成为了带类的C语言，多多少少影响了其面向对象的彻底性！Java则是完全的面向对象语言，它句法更清晰，规模更小，更易学。它是在对多种程序设计语言进行了深入细致研究的基础上，据弃了其他语言的不足之处，从根本上解决了C++的固有缺陷。<br>
 
 1. **指针**<br>
-Java语言让编程者无法找到指针来直接访问内存无指针，并且增添了自动的内存管理功能，从而有效地防止了c/c++语言中指针操作失误，如野指针所造成的系统崩溃。但也不是说JAVA没有指针，虚拟机内部还是使用了指针，只是外人不得使用而已。这有利于Java程序的安全。
+Java语言让编程者无法找到指针来直接访问内存无指针，并且增添了自动的内存管理功能，从而有效地防止了C/C++语言中指针操作失误，如野指针所造成的系统崩溃。但也不是说JAVA没有指针，虚拟机内部还是使用了指针，只是外人不得使用而已。这有利于Java程序的安全。
 2. **多重继承**<br>
 C++支持多重继承，这是C++的一个特征，它允许多父类派生一个类。尽管多重继承功能很强，但使用复杂，而且会引起许多麻烦，编译程序实现它也很不容易。Java不支持多重继承，但允许一个类继承多个接口(extends+implement)，实现了c++多重继承的功能，又避免了c++中的多重继承实现方式带来的诸多不便。
 3. **数据类型及类**<br>
