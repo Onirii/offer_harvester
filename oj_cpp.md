@@ -3,41 +3,40 @@
 ## 2. 最长回文子串 马拉车算法
 ## 3. 网易2019_001 牛牛找工作
 1. std::upper_bound(array.begin(), array.end(), val); 返回一个迭代器指向第一个大于val的值
-2. std::lower_bound(array.begin(), array.end(), val); 返回一个迭代器指向第一个大于等于val的值
+2. std::upper_bound(array.begin(), array.end(), val); 返回一个迭代器指向第一个大于val的值
 ```cpp
 //返回下标
 upper_bound(array.begin(), array.end(), val) - array.begin();
 ```
-3. ```cpp
+2. ```cpp
     ios::sync_with_stdio(0);
 	cin.tie(0);
 ```
 std::cin，std::cout之所以效率低，是因为先把要输出的东西存入缓冲区，再输出，导致效率降低，而上面这段语句可以来取消iostream的输入 输出缓存，可以节省许多时间，使效率与scanf与printf相差无几。
-4. 
+3. 
 
 ## 4. 网易2016 路灯
 	1. while(cin >> P1 >> P2){}
 	2. 浮点数的输出 **#include <iomanip>**
-1. setprecision(n) 控制输出流显示浮点数的数字个数，小数部分末尾为0的部分不输出。
-```cpp
-cout<<setprecision(n)<<result<<endl;
-```
-2. showpoint()，在输出语句前声明：cout.setf(ios::showpoint); 控制输出流显示浮点数的数字个数，不够的位用0补充。
-```cpp
-cout<<setf(ios::showpoint);
-cout<<setprecision(n)<<result<<endl;
-//也可以写成下面的形式
-cout<<showpoint<<setprecision(n)<<result<<endl;
-```
-3. fixed, 在输出语句前声明： cout.setf(ios::fixed); 控制输出的小数部分为n位。
-```cpp
-cout<<setf(ios::fixed);
-cout<<setpresicison(n)<<result<<endl;
-//也可以写成下面的形式
-
-cout<<fixed<<setprecision(n)<<result<<endl;
-//就算后面的cout语句没有声明<<fixed，仍然会做<<fixed处理。
-```
+		1. setprecision(n) 控制输出流显示浮点数的数字个数，小数部分末尾为0的部分不输出。
+		```cpp
+		cout<<setprecision(n)<<result<<endl;
+		```
+		2. showpoint()，在输出语句前声明：cout.setf(ios::showpoint); 控制输出流显示浮点数的数字个数，不够的位用0补充。
+		```cpp
+		cout<<setf(ios::showpoint);
+		cout<<setprecision(n)<<result<<endl;
+		//也可以写成下面的形式
+		cout<<showpoint<<setprecision(n)<<result<<endl;
+		```
+		3. fixed, 在输出语句前声明： cout.setf(ios::fixed); 控制输出的小数部分为n位。
+		```cpp
+		cout<<setf(ios::fixed);
+		cout<<setpresicison(n)<<result<<endl;
+		//也可以写成下面的形式
+		cout<<fixed<<setprecision(n)<<result<<endl;
+		//就算后面的cout语句没有声明<<fixed，仍然会做<<fixed处理。
+		```
 
 ## 5. 拼多多2020 题目1
 	1. 整型数组的输入
@@ -57,7 +56,6 @@ void split(const string &src, vector<int>& dest, const char& delimiter) {
 
 ## 6. 拼多多2020 题目3
 **使用优先队列**
-
 ### 6.1 基本优先队列
 ```cpp
 //优先队列的定义
@@ -73,7 +71,7 @@ priority_queue<int, vector<int>, less<int> > q; //降序队列
 
 ```
 
-### 6.2 使用pair做priority_queue元素
+### 6.2 使用pair做priority元素
 pair的比较，先比较第一个元素，第一个相等比较第二个。
 同样Functional为 greater<pair<int, int>>为升序排列， less<pair<int, int>>为降序排列
 ```cpp
@@ -154,3 +152,94 @@ int main()
     }
 }
 ```
+
+# 7. 中缀表达式转后缀表达式
+
+
+# 8. 背包问题
+## 8.1 01背包问题
+1. 题目描述： 有n 个物品，它们有各自的体积w[i]和价值v[i]，现有给定容量的背包，如何让背包里装入的物品具有最大的价值总和？
+
+```cpp
+// 动态规划计算最优解
+int Number;
+int Capacity;
+vector<int> volume(Number+1, 0);
+vector<int> value(Number+1, 0);
+vector<vector<int>> DP(Number+1, vector<int>(Capacity, 0));
+vector<int> item(Number+1, 0);
+
+// 动态规划寻找最优解
+int FindMax()
+{	
+    int i, j;
+    for(i=1; i<=Number; i++){
+        for(j=volume[i]; j<=Capacity; j++){
+            if(j < volume[i]){ //第i个物品此时已经装不下。
+                DP[i][j] = DP[i-1][j];
+            }
+            else{ //第i个物品此时可装下	
+            	DP[i][j] = max(DP[i-1][j], DP[i-1][j-volume[i]] + value[i]);
+            }
+        }
+    }
+    return DP[Number][Capacity];
+}
+
+// 最优解的具体组成
+void FindWhat(int i, int j)//寻找解的组成方式
+{
+    if(i >= 0)
+    {
+        if(DP[i][j] == DP[i-1][j]){ //相等说明没装
+            item[i]=0; //全局变量，标记未被选中
+            FindWhat(i-1, j);
+        }
+        else if(j - volume[i] >= 0 && DP[i][j] == DP[i-1][j-volume[i]] + value[i]){ //说明i被装入
+            item[i]=1; //标记已被选中
+            FindWhat(i-1,j-w[i]); //回到装包之前的位置
+        }
+    }
+}
+```
+
+```cpp
+// 优化空间复杂度的01问题动态规划解法
+int Number;
+int Capacity;
+vector<int> volume(Number+1, 0);
+vector<int> value(Number+1, 0);
+vector<int> DP(Number+1, 0);
+
+// 动态规划寻找最优解
+int FindMax()
+{	
+    int i, j;
+    for(i=1; i<=Number; i++){
+        for(j=Capacity; j<=volume[i]; j--){
+            if(j < volume[i]){ //第i个物品此时已经装不下。
+                DP[j] = DP[j];
+            }
+            else{ //第i个物品此时可装下	
+            	DP[j] = max(DP[j], DP[j-volume[i]] + value[i]);
+            }
+        }
+    }
+    return DP[Number][Capacity];
+}
+```
+
+## 8.2 完全背包问题
+s
+
+## 8.3 多重背包问题
+
+
+## 8.4 01背包方案数问题
+
+
+## 8.5 完全背包方案数问题
+
+
+## 8.6 多重背包方案数问题
+
