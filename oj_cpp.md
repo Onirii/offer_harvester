@@ -47,7 +47,7 @@ std::cin，std::cout之所以效率低，是因为先把要输出的东西存入
 void split(const string &src, vector<int>& dest, const char& delimiter) {
     dest.clear();
     istringstream iss(src);
-    string tmp;
+    string tmp; 
     while (getline(iss, tmp, delimiter)) {
         dest.push_back(stoi(tmp));//记得转化为int
     }
