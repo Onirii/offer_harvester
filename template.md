@@ -48,7 +48,6 @@ private:
 #endif
 ```
 
-
 ## 2.2 类模板定义
 
 ## 2.3 类模板的成员函数
@@ -61,3 +60,88 @@ private:
 
 ## 2.5 非类型模板参数
 1. 浮点型、类类型不能做为非类型模板参数。
+
+
+
+# 8. 
+## 8.1 C++模板是什么？底层实现原理是什么？
+1. 函数模板，实际上是建立一个通用函数，其函数类型和形参类型不具体指定，用一个虚拟的类型来代表。
+2. 编译器从函数模板通过具体类型产生不同的函数；在函数模板声明定义到执行中编译器会对其进行两次编译：
+	1. 在声明的地方对模板代码本身进行编译；
+	2. 在调用的地方对参数替换后的代码进行编译。
+
+## 8.2 函数模板和类模板的区别是什么？
+1. 函数模板的实例是一个函数，类模板的实例是一个类。
+2. 函数模板的实例化是由编译程序在处理函数调用时自动完成的(参数推断)，而类模板的实例化必须由程序员在程序中显式地指定。即函数模板允许隐式调用和显式调用而类模板只能显示调用。所以在使用时类模板必须加<T>，而函数模板不必。
+
+## 8.3 为什么不能将类模板的声明与类模板函数实现分开写？
+1. 对C++编译器而言，当调用函数的时候，编译器只需要看到函数的声明。当定义类类型的对象时，编译器只需要知道类的定义，而不需要知道类的实现代码。因此，因该将类的定义和函数声明放在头文件中，而普通函数和类成员函数的定义放在源文件中。
+
+2. 模板定义很特殊。 由template<…>处理的任何东西都意味着编译器在当时不为它分配存储空间，它一直处于等待状态直到被一个模板实例告知。在编译器和连接器的某一处，有一机制能去掉指定模板的多重定义。所以为了容易使用，几乎总是在头文件中放置全部的模板声明和定义。
+
+3. 在处理函数模板和类模板时，要进行实例化模板函数和类模板，要求编译器在实例化模板时必须在上下文中可以查看到其定义实体；而反过来，在看到实例化模板之前，编译器对模板的定义体是不处理的——原因很简单，编译器怎么会预先知道typename实参是什么呢？因此模板的实例化与定义体必须放到同一编译单元中。
+
+4. 在分离式编译环境(各个cpp文件完全分开编译，然后生成各自的obj目标文件，最后通过连接器link生成一个可执行的exe文件)下，编译器编译某一个.cpp文件时并不知道另一个.cpp文件的存在，也不会去查找（当遇到未决符号时它会寄希望于连接器）。这种模式在没有模板的情况下运行良好，但遇到模板时会出现问题，因为模板仅在需要的时候才会实例化出来，所以，当编译器只看到模板的声明时，它不能实例化该模板，只能创建一个具有外部连接的符号并期待连接器能够将符号的地址决议出来。然而当实现该模板的.cpp文件中没有用到模板的实例时，编译器也不会去实例化，所以，整个工程的.obj中就找不到一行模板实例的二进制代码，于是连接器也黔驴技穷了。
+
+## 8.4 写一个比较大小的函数模板
+```cpp
+#include <iostream>
+
+template <typename type>
+type MaxValue(type value1, type value2){
+	if(value1 > value2) return value1;
+	else return value2;
+}
+
+int main(){
+	int value1 = 10, value2 = 11;
+	int maxValue;
+	maxValue = MaxValue(value1, value2); //模板函数，隐式调用
+	maxValue = MaxValue<int>(value1, value2); //模板函数，显示调用
+	return 0；
+}
+```
+
+## 8.5 写一个栈类模板
+```cpp
+#include <iostream>
+
+template <typename T>
+class STACK{
+public:
+	STACK();
+	~STACK();
+	void push(T t);
+	T pop();
+	bool IsEmpty();
+private:
+	T *m_pT;
+	int m_maxSize;
+	int m_Index;
+};
+
+template <typename  T>  Stack<T>::Stack(){
+   m_maxSize = 100;      
+   m_Index = 0;
+   m_pT = new T[m_maxSize];
+}
+template <typename T>  Stack<T>::~Stack() {
+   delete [] m_pT ;
+}
+        
+template <typename T> void Stack<T>::push(T t) {
+    m_Index++;
+    m_pT[m_Index - 1] = t;
+    
+}
+template <typename T> T Stack<T>::pop() {
+    T t = m_pT[m_Index - 1];
+    m_Index--;
+    return t;
+}
+template <typename T> bool Stack<T>::isEmpty() {
+    return m_Index == 0;
+}
+```
+
+## 8.6 typename 和 class的区别？
