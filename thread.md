@@ -121,7 +121,7 @@ void sleep_until(const std::chrono::time_point<Clock, Duration>& abs_time);
 
 2. wait() 
 	1. wait(std::mutex) wait()将解锁mutex对象，并堵塞到本行，直到其他某个线程调用notify_one()成员函数为止。
-	2. wait(std::mutex对象，可执行对象)如果可执行对象的返回值为false，wait()将解锁mutex对象，并堵塞到本行，知道其他某个线程调用notify_one()成员函数为止。如果可执行对象的返回值为true，wait()将直接返回。
+	2. wait(std::mutex对象，可执行对象)如果可执行对象的返回值为false，wait()将解锁mutex对象，并堵塞到本行，直到其他某个线程调用notify_one()成员函数为止。如果可执行对象的返回值为true，wait()将直接返回，程序继续执行。
 
 3. notify_one() 唤醒wait()所在的线程
 	1. 当其他线程用notify_one()将wait()所在线程唤醒后，wait()所在线程开始执行：
