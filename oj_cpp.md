@@ -94,7 +94,7 @@ int main(){
 	  cout << a.top().first << ' ' << a.top().second << '\n';
 	  a.pop();
 	}
-	return 0;
+	return 0;    #include<iostream>#include<cmath>using namespace std;class ARRAY{private:    int a[5];    int n;public:    ARRAY(int t[], int m);    int num(int n);    void fun();    void print();};ARRAY::ARRAY(int t[], int m){    n = m;    for (int i = 0; i < n; i++)    {        a[i] = t[i];    }}int ARRAY::num(int m){    int temp = m, tt = 0;    int count = 0;    while (temp)    {        tt = temp;        temp /= 10;        count++;    }    return (m - tt * pow(10, count - 1));}void ARRAY::fun(){    for (int i = 0; i < n; i++)    {        for (int j = i + 1; j < n ; j++)        {            if (num(a[i]) > num(a[j]))            {                int temp;                temp = a[i];                a[i] = a[j];                a[j] = temp;            }        }    }}void ARRAY::print(){    for (int i = 0; i < n; i++)    {        cout << a[i] << '\t';    }    cout << endl;}int main(){    int aa[] = { 134,445,423,233,811 };    ARRAY arr(aa, 5);    arr.fun();    arr.print();    system("pause");    return 0;}
 }
 ```
 
