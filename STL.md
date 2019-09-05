@@ -145,7 +145,7 @@ void left_rotate(node* x) {
 
 	if (x->parent == nil_node) { //x原本为根结点的情况
 		this->root = y;
-	} else if (x == x->parent->right) {
+	} else if (x == x->parent->right){
 		y->parent->right = y;
 	} else {
 		y->parent->left = y;
