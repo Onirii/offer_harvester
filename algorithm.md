@@ -622,3 +622,56 @@ int main() {
 ### 2.3.3 哈希表删除
 1. 链地址法可以直接删除元素
 2. 开放地址法不可以直接删除元素，直接删除元素会导致建立表时与此元素冲突的元素再无法被查找到，所以使用开发地址法解决哈希冲突的哈希表在删除元素后应该在删除位置重置一个原来不存在的元素。
+
+
+# 3
+## 3.1 中缀表达式转后缀表达式
+```cpp
+#include <iostream>
+#include <vector>
+#include <string>
+#include <map>
+#include <stack>
+#include <algorithm>
+using namespace std;
+
+vector<string> infix2suffix(vector<string> record){
+
+	vector<string> oper{"(", "+", "-", "*", "/" , ")"};
+
+	map<string, int> priority;
+	priority["("] = 1;
+	priority["+"] = 2;
+	priority["-"] = 2;
+	priority["*"] = 3;
+	priority["/"] = 3;
+
+	vector<string> result;
+	stack<string> opeaStack;
+	for (int i = 0; i<record.size(); ++i){
+		vector<string>::iterator iter = find(oper.begin(), oper.end(), record[i]);
+		if (iter == oper.end()) result.push_back(record[i]);
+		else if (opeaStack.empty() || record[i] == "(") opeaStack.push(record[i]);
+		else if (record[i] == ")"){
+			while (!opeaStack.empty() && opeaStack.top() != "("){
+				result.push_back(opeaStack.top());
+				opeaStack.pop();
+			}
+			opeaStack.pop();
+		}
+		else{
+			while (!opeaStack.empty() && priority[opeaStack.top()] >= priority[record[i]]){
+				result.push_back(opeaStack.top());
+				opeaStack.pop();
+			}
+			opeaStack.push(record[i]);
+		}
+	}
+	if(!opreStack.empty()) 
+	while (!opeaStack.empty()){
+		result.push_back(opeaStack.top());
+		opeaStack.pop();
+	}
+	return result;
+}
+```
