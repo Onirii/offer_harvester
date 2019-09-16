@@ -35,10 +35,10 @@
 ### 1.3.1.4 传递类对象、智能指针作为线程参数
 1. 将类对象作为线程参数，参数形式为引用，传递给线程的类对象经历过一次拷贝构造，并不会像形参声明那样直接引用。因此在子线程中对此类对象的修改不会影响原线程中的对应类对象。
 2. 创建线程往线程函数传递类对象参数时，不管线程函数中形参是值传递还是引用传递，为了数据安全考虑，编译器统一按照拷贝方式接收参数。如果确实需要保留子线程中对类对象的修改，可使用**std::ref()**包装按照引用传值的参数，这时编译器会跳过对参数的拷贝，直接使用真正的引用传值。
-3. 将类对象最为线程参数，
+3. 将类对象最为线程参数。
 
 ### 1.3.1.5 用成员函数指针做线程参数
-1. std::thread thread(&className::functionName, &objectName, paralist);//第二个参数为&可以保证主线程和子线程是对同一个object进行的操作。
+1. std::thread threadName(&className::functionName, &objectName, paralist);//第二个参数为&可以保证主线程和子线程是对同一个object进行的操作。
 
 ## 1.4. 创建多个线程
 ### 1.4.1 创建和等待多个线程
@@ -80,7 +80,7 @@ void sleep_until(const std::chrono::time_point<Clock, Duration>& abs_time);
 	1. 一次锁住两个或者两个以上的互斥量，可避免多线程中因为加锁顺序引起的死锁。
 	2. 如果对多个mutex的加锁过程中有个别没有成功，则std::lock()会释放已经加锁的mutex。
 	3. std::lock(mutex1, mutex2, ...);
-3. std::lock_guard的std::adopt_lock参数 
+3. std::lock_guard的std::adopt_lock参数
 	1. std::lock() + std::lock_guard
 
 ## 1.6 unique_lock
@@ -349,12 +349,70 @@ private:
 #include <mutex>
 #include <condition_variable>
 
+using namespace std;
 
+mutex m_mutex;//保护条件的互斥访问
+condition_variable cond;//条件变量
+int flag = 10;//条件
+void fun(int num) {
+    for (int i = 0; i<50; i++) {
+        unique_lock<mutex> lk(m_mutex);
+        while (flag != num)
+            cond.wait(lk); //在调用wait时会执行lk.unlock()  
+        for (int j = 0; j<num; j++)
+            cout << j << " ";
+        cout << endl;
+        flag = (num == 10) ? 100 : 10;
+        cond.notify_one(); //被阻塞的线程唤醒后lk.lock()恢复在调用wait前的状态  
+    }
+}
+
+int main() {
+    thread child(fun, 10);
+    fun(100);
+    child.join();
+    
+    return 0;
+}
 ```
 
 2. 编写一个程序，开启3个线程，这3个线程的ID分别为A、B、C，每个线程将自己的ID在屏幕上打印10遍，要求输出结果必须按ABC的顺序显示；如：ABCABC….依次递推。
 ```cpp
+#include <iostream>
+#include <mutex>
+#include <thread>
+#include <condition_variable>
 
+using namespace std;
+
+mutex m_mutex;
+condition_variable cond;
+int loop = 10;
+int flag = 0;
+
+void func(int id)
+{
+    for (int i = 0; i < loop; ++i)
+    {
+        unique_lock<mutex> lk(m_mutex);
+        while (flag != id)
+            cond.wait(lk);
+        cout << static_cast<char>('A' + id) << " ";
+        flag = (flag + 1) % 3;
+        cond.notify_all();
+    }
+}
+
+void main()
+{
+    thread A(func, 0);
+    thread B(func, 1);
+    func(2);
+    cout << endl;
+
+    A.join();
+    B.join();
+}
 ```
 
 3. 有四个线程1、2、3、4。线程1的功能就是输出1，线程2的功能就是输出2，以此类推.........现在有四个文件ABCD。初始都为空。现要让四个文件呈如下格式：
