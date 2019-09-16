@@ -768,3 +768,147 @@ vector<string> infix2suffix(vector<string> record){
 	return result;
 }
 ```
+
+# 4. 重写string类
+```cpp
+//MyString.h
+#ifndef  MYSTRING_H_
+#define  MYSTRING_H_
+#include <stddef.h>
+#include <iostream>
+ 
+class MyString
+{
+public:
+	MyString(const char* str = NULL);
+	MyString(const MyString & another);
+	MyString & operator = (const MyString & another);
+	MyString operator + (const MyString & another);
+ 
+	bool operator > (const MyString & another);
+	bool operator < (const MyString & another);
+	bool operator == (const MyString & another);
+ 
+	char& operator[](int idx);
+	
+	void dis();
+ 
+	~MyString(void);
+private:
+	char* m_data;
+};
+ 
+#endif
+```
+
+```cpp
+//MyString.cpp
+
+#include "MyString.h"
+ 
+// 默认构造器
+MyString::MyString(const char* str)
+{
+	if (NULL == str){
+		m_data = new char[1];
+		*m_data = '\0';
+	}
+	else{
+		int len = strlen(str);
+		m_data = new char[len + 1];
+		strcpy_s(m_data, len + 1, str);
+	}
+}
+
+// 拷贝构造器
+MyString::MyString(const MyString & another)
+{
+	int len = strlen(another.m_data);
+	m_data = new char[len + 1];
+	strcpy_s(m_data, len + 1, another.m_data);
+}
+
+// 析构函数
+MyString::~MyString()
+{
+    delete []m_data;
+    m_data = NULL;
+}
+
+// 赋值运算符重载
+MyString & MyString::operator = (const MyString & another)
+{
+	// 自赋值，出现错误
+	if (this == &another){
+		return *this;
+	}
+	// 先删除自己开辟的空间
+	delete []m_data;
+	m_data = NULL;
+
+	//分配新的内存资源，复制内容
+	int len = strlen(another.m_data);
+	this->m_data = new char[len + 1];
+	strcpy_s(m_data, len + 1, another.m_data);
+	//返回对本对象的引用
+	return *this;
+}
+// 加法运算符重载
+MyString MyString::operator + (const MyString & another)
+{
+	int len = strlen(m_data) + strlen(another.m_data);
+	//创建拼接结果，释放其原有内存
+	MyString str;
+	delete []str.m_data;
+	str.m_data = NULL;
+
+	
+	str.m_data = new char[len +  1];
+	memset(str.m_data, 0, len + 1);
+	int len1 = strlen(this->m_data) + 1;  
+	strcat_s(str.m_data, len1, this->m_data);
+	// 源串长度 + 目标串长度 + 结束符
+	int len2 = strlen(this->m_data) + strlen(another.m_data) + 1;
+	strcat_s(str.m_data, len2, another.m_data);
+	return str;
+}
+// ==关系运算符重载
+bool MyString::operator==(const MyString &other)
+{
+	if(strcmp(m_data,other.m_data) == 0)
+		return true;
+	else
+		return false;
+}
+// >关系运算符重载
+bool MyString::operator>(const MyString &other)
+{
+	if(strcmp(m_data, other.m_data) > 0)
+		return true;
+	else
+		return false;
+}
+// <运算符重载
+bool MyString::operator<(const MyString &other)
+{
+	if(strcmp(m_data,other.m_data) < 0)
+		return true;
+	else
+		return false;
+}
+// []运算符重载
+char& MyString::operator[](int idx)
+{
+	return m_data[idx];
+}
+// 打印函数
+void MyString::dis()
+{
+	using namespace std;
+	for (size_t i = 0; i < strlen(this->m_data); ++i)
+	{
+		cout << _str[i];
+	}
+	cout << endl;
+}
+```
